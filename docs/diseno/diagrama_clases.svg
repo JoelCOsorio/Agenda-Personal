@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1580 1090" width="1580" height="1090" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <!-- Sombra suave para tarjetas UML -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="112%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.10"/>
+    </filter>
+
+    <!-- Herencia UML (triangulo hueco) -->
+    <marker id="uml-inherit" viewBox="0 0 16 16" refX="15" refY="8" markerWidth="13" markerHeight="13" orient="auto-start-reverse">
+      <path d="M 1,1 L 15,8 L 1,15 Z" fill="#FFFFFF" stroke="#475569" stroke-width="1.6"/>
+    </marker>
+
+    <!-- Composicion UML (rombo relleno) -->
+    <marker id="uml-compose" viewBox="0 0 18 12" refX="2" refY="6" markerWidth="14" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 1,6 L 9,1 L 17,6 L 9,11 Z" fill="#1E293B" stroke="#1E293B" stroke-width="1.2"/>
+    </marker>
+
+    <!-- Flecha de asociacion dirigida -->
+    <marker id="uml-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 1,1 L 10,6 L 1,11" fill="none" stroke="#475569" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- Fondo general -->
+  <rect width="1580" height="1090" fill="#F8FAFC"/>
+
+  <!-- Encabezado del diagrama -->
+  <text x="40" y="38" font-size="22" font-weight="700" fill="#0F172A">Diagrama de Clases UML — Modelo de Dominio</text>
+  <text x="40" y="60" font-size="13" fill="#475569">Agenda Personal y Académica Multiplataforma (Flet: Android, Windows, Linux) | Preparado con UUIDv4 y Timestamps UTC (RN-10)</text>
+
+  <!-- ========================================================= -->
+  <!-- CONECTORES Y RELACIONES (capa inferior)                    -->
+  <!-- ========================================================= -->
+  <g stroke="#475569" stroke-width="1.7" fill="none">
+    <!-- Herencia hacia EntidadBase (bus ortogonal y=170) -->
+    <path d="M 790,170 L 790,145" marker-end="url(#uml-inherit)"/>
+    <path d="M 210,170 L 1390,170"/>
+    <path d="M 210,170 L 210,200"/>
+    <path d="M 600,170 L 600,200"/>
+    <path d="M 1010,170 L 1010,200"/>
+    <path d="M 1390,170 L 1390,200"/>
+
+    <!-- Categoria (1) ◆── (0..*) Subcategoria -->
+    <path d="M 600,320 L 600,375" marker-start="url(#uml-compose)" stroke="#1E293B"/>
+
+    <!-- Evento (0..*) ──> (0..1) Categoria -->
+    <path d="M 380,260 L 460,260" marker-end="url(#uml-arrow)"/>
+    <!-- Evento (0..*) ──> (0..1) Subcategoria -->
+    <path d="M 380,430 L 460,430" marker-end="url(#uml-arrow)"/>
+
+    <!-- Tarea (0..*) ──> (0..1) Categoria -->
+    <path d="M 840,260 L 740,260" marker-end="url(#uml-arrow)"/>
+    <!-- Tarea (0..*) ──> (0..1) Subcategoria -->
+    <path d="M 840,430 L 740,430" marker-end="url(#uml-arrow)"/>
+
+    <!-- Evento (1) ◆── (0..1) ReglaRecurrencia -->
+    <path d="M 200,490 L 200,565" marker-start="url(#uml-compose)" stroke="#1E293B"/>
+
+    <!-- Evento (0..1) ◆── (0..1) Recordatorio (XOR) -->
+    <path d="M 325,490 L 325,528 L 515,528 L 515,565" marker-start="url(#uml-compose)" stroke="#1E293B"/>
+
+    <!-- Tarea (0..1) ◆── (0..1) Recordatorio (XOR) -->
+    <path d="M 905,470 L 905,528 L 695,528 L 695,565" marker-start="url(#uml-compose)" stroke="#1E293B"/>
+
+    <!-- Linea punteada XOR entre ramas de Recordatorio -->
+    <path d="M 515,528 L 695,528" stroke="#D97706" stroke-width="1.6" stroke-dasharray="5,4"/>
+
+    <!-- Tarea (0..*) ── (0..*) Contacto -->
+    <path d="M 1015,470 L 1015,565"/>
+
+    <!-- Evento (0..*) ── (0..*) Contacto (canal inferior limpio sin cruces) -->
+    <path d="M 365,490 L 365,838 L 1015,838 L 1015,805"/>
+
+    <!-- ConfiguracionSistema ..> Recordatorio (<<parametriza>> canal lateral) -->
+    <path d="M 1390,465 L 1390,510 L 1220,510 L 1220,858 L 605,858 L 605,815" stroke="#64748B" stroke-dasharray="6,4" marker-end="url(#uml-arrow)"/>
+  </g>
+
+  <!-- Etiquetas de Multiplicidad y Roles -->
+  <g font-size="11.5" fill="#334155" font-weight="600">
+    <!-- Categoria -> Subcategoria -->
+    <text x="610" y="336">1</text>
+    <text x="610" y="366">0..*</text>
+    <text x="530" y="352" font-weight="400" fill="#64748B">contiene</text>
+
+    <!-- Evento -> Categoria / Subcategoria -->
+    <text x="387" y="253">0..*</text>
+    <text x="430" y="253">0..1</text>
+    <text x="387" y="423">0..*</text>
+    <text x="430" y="423">0..1</text>
+
+    <!-- Tarea -> Categoria / Subcategoria -->
+    <text x="812" y="253">0..*</text>
+    <text x="748" y="253">0..1</text>
+    <text x="812" y="423">0..*</text>
+    <text x="748" y="423">0..1</text>
+
+    <!-- Evento -> ReglaRecurrencia -->
+    <text x="210" y="508">1</text>
+    <text x="210" y="556">0..1</text>
+    <text x="108" y="534" font-weight="400" fill="#64748B">recurrencia</text>
+
+    <!-- Evento / Tarea -> Recordatorio {XOR} -->
+    <text x="333" y="508">0..1</text>
+    <text x="484" y="556">0..1</text>
+    <text x="913" y="488">0..1</text>
+    <text x="703" y="556">0..1</text>
+    <rect x="576" y="516" width="58" height="22" rx="11" fill="#FEF3C7" stroke="#D97706" stroke-width="1.2"/>
+    <text x="605" y="531" text-anchor="middle" font-size="11" font-weight="700" fill="#B45309">{XOR}</text>
+
+    <!-- Tarea <-> Contacto -->
+    <text x="1024" y="488">0..*</text>
+    <text x="1024" y="556">0..*</text>
+    <text x="1024" y="524" font-weight="400" fill="#64748B">vincula</text>
+
+    <!-- Evento <-> Contacto -->
+    <text x="373" y="508">0..*</text>
+    <text x="1024" y="828">0..*</text>
+    <text x="670" y="832" font-weight="400" fill="#64748B">vincula (N:M — RN-13 sin cascada)</text>
+
+    <!-- ConfiguracionSistema ..> Recordatorio -->
+    <text x="1232" y="504" font-weight="400" fill="#64748B">&lt;&lt;parametriza RN-14&gt;&gt;</text>
+  </g>
+
+  <!-- ========================================================= -->
+  <!-- CLASE BASE ABSTRACTA (Row 0)                               -->
+  <!-- ========================================================= -->
+  <g filter="url(#shadow)">
+    <rect x="615" y="40" width="350" height="105" rx="8" fill="#FFFFFF" stroke="#64748B" stroke-width="1.8"/>
+    <path d="M 615,48 Q 615,40 623,40 L 957,40 Q 965,40 965,48 L 965,82 L 615,82 Z" fill="#475569"/>
+    <text x="790" y="57" text-anchor="middle" font-size="11" fill="#E2E8F0">&lt;&lt;abstract&gt;&gt;</text>
+    <text x="790" y="75" text-anchor="middle" font-size="15" font-weight="700" font-style="italic" fill="#FFFFFF">EntidadBase</text>
+    <text x="630" y="102" font-size="12.5" fill="#1E293B">+ id : UUID (UUIDv4, PK)</text>
+    <text x="630" y="120" font-size="12.5" fill="#1E293B">+ created_at : DateTime (UTC)</text>
+    <text x="630" y="138" font-size="12.5" fill="#1E293B">+ updated_at : DateTime (UTC)</text>
+  </g>
+
+  <!-- ========================================================= -->
+  <!-- ROW 1: EVENTO | CATEGORIA + SUBCATEGORIA | TAREA | AJUSTES -->
+  <!-- ========================================================= -->
+
+  <!-- EVENTO (Col 1) -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="200" width="340" height="290" rx="8" fill="#FFFFFF" stroke="#2563EB" stroke-width="1.8"/>
+    <path d="M 40,208 Q 40,200 48,200 L 372,200 Q 380,200 380,208 L 380,238 L 40,238 Z" fill="#2563EB"/>
+    <text x="210" y="224" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">Evento</text>
+
+    <g font-size="12" fill="#1E293B">
+      <text x="54" y="258">+ titulo : str [obligatorio]</text>
+      <text x="54" y="275">+ descripcion : str?</text>
+      <text x="54" y="292">+ fecha_inicio : DateTime [obligatorio]</text>
+      <text x="54" y="309">+ fecha_fin : DateTime? [RN-01]</text>
+      <text x="54" y="326">+ todo_el_dia : bool</text>
+      <text x="54" y="343">+ ubicacion : str?</text>
+      <text x="54" y="360">+ color_hex : str?</text>
+      <text x="54" y="377">+ categoria_id : UUID? (FK)</text>
+      <text x="54" y="394">+ subcategoria_id : UUID? (FK)</text>
+    </g>
+    <line x1="40" y1="406" x2="380" y2="406" stroke="#CBD5E1" stroke-width="1.2"/>
+    <g font-size="11.8" fill="#0F172A">
+      <text x="54" y="425">+ validar_rango_temporal() : bool</text>
+      <text x="54" y="443">+ se_solapa_con(otro: Evento) : bool</text>
+      <text x="54" y="461">+ es_pasado(ref: DateTime) : bool</text>
+      <text x="54" y="479">+ reprogramar(ini, fin) : void</text>
+    </g>
+  </g>
+
+  <!-- CATEGORIA (Col 2, Top) -->
+  <g filter="url(#shadow)">
+    <rect x="460" y="200" width="280" height="120" rx="8" fill="#FFFFFF" stroke="#6366F1" stroke-width="1.8"/>
+    <path d="M 460,208 Q 460,200 468,200 L 732,200 Q 740,200 740,208 L 740,236 L 460,236 Z" fill="#6366F1"/>
+    <text x="600" y="223" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">Categoria</text>
+    <g font-size="12" fill="#1E293B">
+      <text x="474" y="257">+ nombre : str [obligatorio]</text>
+      <text x="474" y="276">+ color_hex : str</text>
+      <text x="474" y="295">+ icono : str?</text>
+      <text x="474" y="312" font-size="11" fill="#64748B">Nivel 1 (ej. Universidad, Personal)</text>
+    </g>
+  </g>
+
+  <!-- SUBCATEGORIA (Col 2, Mid) -->
+  <g filter="url(#shadow)">
+    <rect x="460" y="375" width="280" height="115" rx="8" fill="#FFFFFF" stroke="#6366F1" stroke-width="1.8"/>
+    <path d="M 460,383 Q 460,375 468,375 L 732,375 Q 740,375 740,383 L 740,411 L 460,411 Z" fill="#818CF8"/>
+    <text x="600" y="398" text-anchor="middle" font-size="14.5" font-weight="700" fill="#FFFFFF">Subcategoria &lt;&lt;EntidadBase&gt;&gt;</text>
+    <g font-size="12" fill="#1E293B">
+      <text x="474" y="431">+ categoria_id : UUID (FK)</text>
+      <text x="474" y="449">+ nombre : str [obligatorio]</text>
+      <text x="474" y="467">+ color_hex : str?</text>
+      <text x="474" y="483" font-size="11" fill="#64748B">Nivel 2 máx. (RN-09 — Materias)</text>
+    </g>
+  </g>
+
+  <!-- TAREA (Col 3) -->
+  <g filter="url(#shadow)">
+    <rect x="840" y="200" width="340" height="270" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="1.8"/>
+    <path d="M 840,208 Q 840,200 848,200 L 1172,200 Q 1180,200 1180,208 L 1180,238 L 840,238 Z" fill="#059669"/>
+    <text x="1010" y="224" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">Tarea</text>
+    <g font-size="12" fill="#1E293B">
+      <text x="854" y="258">+ titulo : str [obligatorio]</text>
+      <text x="854" y="275">+ descripcion : str?</text>
+      <text x="854" y="292">+ fecha_limite : DateTime?</text>
+      <text x="854" y="309">+ prioridad : PrioridadTarea</text>
+      <text x="854" y="326">+ estado : EstadoTarea</text>
+      <text x="854" y="343">+ categoria_id : UUID? (FK)</text>
+      <text x="854" y="360">+ subcategoria_id : UUID? (FK)</text>
+    </g>
+    <line x1="840" y1="373" x2="1180" y2="373" stroke="#CBD5E1" stroke-width="1.2"/>
+    <g font-size="11.8" fill="#0F172A">
+      <text x="854" y="393">+ completar() : void  [RN-12]</text>
+      <text x="854" y="411">+ reactivar(estado) : void  [RN-12]</text>
+      <text x="854" y="429">+ reprogramar(fecha) : void  [RN-02]</text>
+      <text x="854" y="454" font-size="11" fill="#64748B">Módulo propio separado de Agenda (RN-07)</text>
+    </g>
+  </g>
+
+  <!-- CONFIGURACION_SISTEMA (Col 4, Top) -->
+  <g filter="url(#shadow)">
+    <rect x="1240" y="200" width="300" height="265" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.8"/>
+    <path d="M 1240,208 Q 1240,200 1248,200 L 1532,200 Q 1540,200 1540,208 L 1540,244 L 1240,244 Z" fill="#0F766E"/>
+    <text x="1390" y="218" text-anchor="middle" font-size="11" fill="#CCFBF1">&lt;&lt;singleton&gt;&gt;</text>
+    <text x="1390" y="236" text-anchor="middle" font-size="14.5" font-weight="700" fill="#FFFFFF">ConfiguracionSistema</text>
+    <g font-size="11.8" fill="#1E293B">
+      <text x="1254" y="264">+ minutos_posponer_defecto : int</text>
+      <text x="1254" y="282">+ antelacion_defecto_min : int</text>
+      <text x="1254" y="300">+ sonido_notificaciones : bool</text>
+      <text x="1254" y="318">+ mostrar_perdidas_inicio : bool</text>
+      <text x="1254" y="336">+ formato_24h : bool</text>
+      <text x="1254" y="354">+ primer_dia_semana : int</text>
+      <text x="1254" y="372">+ vista_inicial_agenda : VistaAgenda</text>
+      <text x="1254" y="390">+ tema_oscuro : bool</text>
+    </g>
+    <line x1="1240" y1="404" x2="1540" y2="404" stroke="#CBD5E1" stroke-width="1.2"/>
+    <g font-size="11.8" fill="#0F172A">
+      <text x="1254" y="424">+ restablecer_valores_defecto() : void</text>
+      <text x="1254" y="446" font-size="11" fill="#64748B">Ajustes centralizados (RN-14)</text>
+    </g>
+  </g>
+
+  <!-- ========================================================= -->
+  <!-- ROW 2: REGLA_RECURRENCIA | RECORDATORIO | CONTACTO | NOTA -->
+  <!-- ========================================================= -->
+
+  <!-- REGLA_RECURRENCIA (Col 1, Bottom) -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="565" width="310" height="225" rx="8" fill="#FFFFFF" stroke="#2563EB" stroke-width="1.8"/>
+    <path d="M 40,573 Q 40,565 48,565 L 342,565 Q 350,565 350,573 L 350,606 L 40,606 Z" fill="#3B82F6"/>
+    <text x="195" y="582" text-anchor="middle" font-size="10.5" fill="#DBEAFE">&lt;&lt;EntidadBase&gt;&gt;</text>
+    <text x="195" y="599" text-anchor="middle" font-size="14.5" font-weight="700" fill="#FFFFFF">ReglaRecurrencia</text>
+    <g font-size="12" fill="#1E293B">
+      <text x="54" y="626">+ evento_id : UUID (FK, UNIQUE)</text>
+      <text x="54" y="644">+ frecuencia : TipoFrecuencia</text>
+      <text x="54" y="662">+ intervalo : int</text>
+      <text x="54" y="680">+ dias_semana : str?</text>
+      <text x="54" y="698">+ fecha_fin_recurrencia : Date?</text>
+      <text x="54" y="716">+ max_ocurrencias : int?</text>
+    </g>
+    <line x1="40" y1="730" x2="350" y2="730" stroke="#CBD5E1" stroke-width="1.2"/>
+    <text x="54" y="750" font-size="11.8" fill="#0F172A">+ expandir_ocurrencias(ini, fin) : List</text>
+    <text x="54" y="772" font-size="11" fill="#64748B">Validada contra choques (RN-11)</text>
+  </g>
+
+  <!-- RECORDATORIO (Col 2, Bottom) -->
+  <g filter="url(#shadow)">
+    <rect x="415" y="565" width="380" height="250" rx="8" fill="#FFFFFF" stroke="#D97706" stroke-width="2"/>
+    <path d="M 415,573 Q 415,565 423,565 L 787,565 Q 795,565 795,573 L 795,606 L 415,606 Z" fill="#D97706"/>
+    <text x="605" y="582" text-anchor="middle" font-size="10.5" fill="#FEF3C7">&lt;&lt;EntidadBase — Motor Unificado&gt;&gt;</text>
+    <text x="605" y="599" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">Recordatorio</text>
+    <g font-size="12" fill="#1E293B">
+      <text x="429" y="626">+ tipo_origen : TipoOrigenRecordatorio</text>
+      <text x="429" y="643">+ evento_id : UUID? (FK, UNIQUE, XOR)</text>
+      <text x="429" y="660">+ tarea_id : UUID? (FK, UNIQUE, XOR)</text>
+      <text x="429" y="677">+ antelacion_minutos : int [0..10080 — 7 días]</text>
+      <text x="429" y="694">+ fecha_disparo : DateTime (UTC)</text>
+      <text x="429" y="711">+ estado : EstadoRecordatorio</text>
+      <text x="429" y="728">+ id_notificacion_so : str?</text>
+    </g>
+    <line x1="415" y1="739" x2="795" y2="739" stroke="#CBD5E1" stroke-width="1.2"/>
+    <g font-size="11.6" fill="#0F172A">
+      <text x="429" y="757">+ calcular_fecha_disparo(objetivo) : DateTime</text>
+      <text x="429" y="774">+ es_valido_para_programar(ahora) : bool [RN-03]</text>
+      <text x="429" y="791">+ marcar_perdido() : void [RN-05]</text>
+      <text x="429" y="808">+ posponer(min_snooze) : DateTime | + cancelar()</text>
+    </g>
+  </g>
+
+  <!-- CONTACTO (Col 3, Bottom) -->
+  <g filter="url(#shadow)">
+    <rect x="860" y="565" width="310" height="240" rx="8" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.8"/>
+    <path d="M 860,573 Q 860,565 868,565 L 1162,565 Q 1170,565 1170,573 L 1170,606 L 860,606 Z" fill="#7C3AED"/>
+    <text x="1015" y="582" text-anchor="middle" font-size="10.5" fill="#EDE9FE">&lt;&lt;EntidadBase&gt;&gt;</text>
+    <text x="1015" y="599" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">Contacto</text>
+    <g font-size="12" fill="#1E293B">
+      <text x="874" y="626">+ nombre : str [obligatorio]</text>
+      <text x="874" y="644">+ telefono : str?</text>
+      <text x="874" y="662">+ correo : str?</text>
+      <text x="874" y="680">+ notas : str?</text>
+      <text x="874" y="698">+ etiqueta : str?</text>
+    </g>
+    <line x1="860" y1="712" x2="1170" y2="712" stroke="#CBD5E1" stroke-width="1.2"/>
+    <g font-size="11.6" fill="#0F172A">
+      <text x="874" y="732">+ puede_enviar_correo() : bool</text>
+      <text x="874" y="750">+ puede_llamar(so: PlataformaSO) : bool</text>
+      <text x="874" y="768">+ generar_uri_correo() : str? [mailto:]</text>
+      <text x="874" y="786">+ generar_uri_llamada() : str? [tel: Android]</text>
+    </g>
+  </g>
+
+  <!-- NOTA ARQUITECTONICA / LEYENDA (Col 4, Bottom) -->
+  <g filter="url(#shadow)">
+    <rect x="1240" y="565" width="300" height="240" rx="8" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.4" stroke-dasharray="5,3"/>
+    <text x="1256" y="592" font-size="13.5" font-weight="700" fill="#92400E">Notas de Diseño y Reglas Clave</text>
+    <line x1="1256" y1="602" x2="1524" y2="602" stroke="#FCD34D" stroke-width="1"/>
+    <g font-size="11.5" fill="#78350F">
+      <text x="1256" y="624">• RN-03: 1 recordatorio máx. por ítem</text>
+      <text x="1264" y="640">(antelación 0 a 7 días = 10,080 min).</text>
+      <text x="1256" y="662">• RN-05: Estado PERDIDO detectado al</text>
+      <text x="1264" y="678">reiniciar si equipo estuvo apagado.</text>
+      <text x="1256" y="700">• RN-08: tel: solo habilitado en Android;</text>
+      <text x="1264" y="716">mailto: en Android, Windows y Linux.</text>
+      <text x="1256" y="738">• RN-10: UUIDv4 + UTC para sync futuro.</text>
+      <text x="1256" y="760">• RN-11: Sin solapamiento de eventos.</text>
+      <text x="1256" y="782">• RN-13: Borrar Contacto/Cat. no borra</text>
+      <text x="1264" y="796">Eventos ni Tareas vinculados.</text>
+    </g>
+  </g>
+
+  <!-- ========================================================= -->
+  <!-- ROW 3: ENUMERACIONES DEL DOMINIO                           -->
+  <!-- ========================================================= -->
+  <text x="40" y="882" font-size="14" font-weight="700" fill="#334155">Enumeraciones del Dominio</text>
+
+  <!-- TipoFrecuencia -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="896" width="210" height="160" rx="6" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.4"/>
+    <rect x="40" y="896" width="210" height="36" rx="6" fill="#E2E8F0"/>
+    <text x="145" y="911" text-anchor="middle" font-size="10" fill="#475569">&lt;&lt;enumeration&gt;&gt;</text>
+    <text x="145" y="926" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F172A">TipoFrecuencia</text>
+    <g font-size="11.8" fill="#334155">
+      <text x="56" y="956">DIARIA</text>
+      <text x="56" y="976">SEMANAL</text>
+      <text x="56" y="996">MENSUAL</text>
+      <text x="56" y="1016">ANUAL</text>
+    </g>
+  </g>
+
+  <!-- PrioridadTarea -->
+  <g filter="url(#shadow)">
+    <rect x="275" y="896" width="200" height="160" rx="6" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.4"/>
+    <rect x="275" y="896" width="200" height="36" rx="6" fill="#E2E8F0"/>
+    <text x="375" y="911" text-anchor="middle" font-size="10" fill="#475569">&lt;&lt;enumeration&gt;&gt;</text>
+    <text x="375" y="926" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F172A">PrioridadTarea</text>
+    <g font-size="11.8" fill="#334155">
+      <text x="291" y="956">BAJA</text>
+      <text x="291" y="976">MEDIA</text>
+      <text x="291" y="996">ALTA</text>
+    </g>
+  </g>
+
+  <!-- EstadoTarea -->
+  <g filter="url(#shadow)">
+    <rect x="500" y="896" width="205" height="160" rx="6" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.4"/>
+    <rect x="500" y="896" width="205" height="36" rx="6" fill="#E2E8F0"/>
+    <text x="602" y="911" text-anchor="middle" font-size="10" fill="#475569">&lt;&lt;enumeration&gt;&gt;</text>
+    <text x="602" y="926" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F172A">EstadoTarea</text>
+    <g font-size="11.8" fill="#334155">
+      <text x="516" y="956">PENDIENTE</text>
+      <text x="516" y="976">EN_PROGRESO</text>
+      <text x="516" y="996">COMPLETADA</text>
+    </g>
+  </g>
+
+  <!-- EstadoRecordatorio -->
+  <g filter="url(#shadow)">
+    <rect x="730" y="896" width="230" height="165" rx="6" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.4"/>
+    <rect x="730" y="896" width="230" height="36" rx="6" fill="#FEF3C7"/>
+    <text x="845" y="911" text-anchor="middle" font-size="10" fill="#92400E">&lt;&lt;enumeration&gt;&gt;</text>
+    <text x="845" y="926" text-anchor="middle" font-size="12.5" font-weight="700" fill="#78350F">EstadoRecordatorio</text>
+    <g font-size="11.5" fill="#334155">
+      <text x="746" y="953">PENDIENTE</text>
+      <text x="746" y="971">ENTREGADO</text>
+      <text x="746" y="989">PERDIDO</text>
+      <text x="746" y="1007">POSPUESTO</text>
+      <text x="746" y="1025">CANCELADO</text>
+      <text x="746" y="1043">ATENDIDO</text>
+    </g>
+  </g>
+
+  <!-- TipoOrigenRecordatorio -->
+  <g filter="url(#shadow)">
+    <rect x="985" y="896" width="215" height="160" rx="6" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.4"/>
+    <rect x="985" y="896" width="215" height="36" rx="6" fill="#E2E8F0"/>
+    <text x="1092" y="911" text-anchor="middle" font-size="10" fill="#475569">&lt;&lt;enumeration&gt;&gt;</text>
+    <text x="1092" y="926" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F172A">TipoOrigenRecordatorio</text>
+    <g font-size="11.8" fill="#334155">
+      <text x="1001" y="956">EVENTO</text>
+      <text x="1001" y="976">TAREA</text>
+    </g>
+  </g>
+
+  <!-- PlataformaSO + VistaAgenda -->
+  <g filter="url(#shadow)">
+    <rect x="1225" y="896" width="150" height="160" rx="6" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.4"/>
+    <rect x="1225" y="896" width="150" height="36" rx="6" fill="#E2E8F0"/>
+    <text x="1300" y="911" text-anchor="middle" font-size="10" fill="#475569">&lt;&lt;enumeration&gt;&gt;</text>
+    <text x="1300" y="926" text-anchor="middle" font-size="12" font-weight="700" fill="#0F172A">PlataformaSO</text>
+    <g font-size="11.8" fill="#334155">
+      <text x="1241" y="956">ANDROID</text>
+      <text x="1241" y="976">WINDOWS</text>
+      <text x="1241" y="996">LINUX</text>
+    </g>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1395" y="896" width="145" height="160" rx="6" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.4"/>
+    <rect x="1395" y="896" width="145" height="36" rx="6" fill="#E2E8F0"/>
+    <text x="1467" y="911" text-anchor="middle" font-size="10" fill="#475569">&lt;&lt;enumeration&gt;&gt;</text>
+    <text x="1467" y="926" text-anchor="middle" font-size="12" font-weight="700" fill="#0F172A">VistaAgenda</text>
+    <g font-size="11.8" fill="#334155">
+      <text x="1411" y="956">DIA</text>
+      <text x="1411" y="976">SEMANA</text>
+      <text x="1411" y="996">MES</text>
+      <text x="1411" y="1016">ANIO</text>
+    </g>
+  </g>
+</svg>

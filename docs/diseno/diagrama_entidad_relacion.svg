@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1580 960" width="1580" height="960" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="112%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.10"/>
+    </filter>
+    <!-- Pata de gallo (0..N) -->
+    <marker id="er-many" viewBox="0 0 18 16" refX="16" refY="8" markerWidth="14" markerHeight="14" orient="auto-start-reverse">
+      <circle cx="4" cy="8" r="3" fill="#FFFFFF" stroke="#475569" stroke-width="1.5"/>
+      <path d="M 8,8 L 17,2 M 8,8 L 17,8 M 8,8 L 17,14" stroke="#475569" stroke-width="1.5" fill="none"/>
+    </marker>
+    <!-- Uno obligatorio (1) -->
+    <marker id="er-one" viewBox="0 0 12 16" refX="2" refY="8" markerWidth="10" markerHeight="14" orient="auto-start-reverse">
+      <path d="M 4,2 L 4,14 M 8,2 L 8,14" stroke="#475569" stroke-width="1.6"/>
+    </marker>
+    <!-- Cero o uno (0..1) -->
+    <marker id="er-zero-one" viewBox="0 0 16 16" refX="14" refY="8" markerWidth="13" markerHeight="14" orient="auto-start-reverse">
+      <circle cx="5" cy="8" r="3" fill="#FFFFFF" stroke="#475569" stroke-width="1.5"/>
+      <path d="M 12,2 L 12,14" stroke="#475569" stroke-width="1.6"/>
+    </marker>
+  </defs>
+
+  <rect width="1580" height="960" fill="#F8FAFC"/>
+
+  <!-- Encabezado -->
+  <text x="40" y="38" font-size="22" font-weight="700" fill="#0F172A">Modelo Entidad–Relación (Esquema Relacional SQLite)</text>
+  <text x="40" y="60" font-size="13" fill="#475569">Claves UUIDv4, Integridad Referencial sin Borrado en Cascada en Contactos/Categorías (RN-13) y Arco Exclusivo XOR en Recordatorios (RN-03)</text>
+
+  <!-- ========================================================= -->
+  <!-- RELACIONES ER (capa inferior)                              -->
+  <!-- ========================================================= -->
+  <g stroke="#475569" stroke-width="1.7" fill="none">
+    <!-- CATEGORIAS (1) ── (0..*) SUBCATEGORIAS -->
+    <path d="M 600,235 L 600,295" marker-start="url(#er-one)" marker-end="url(#er-many)"/>
+
+    <!-- CATEGORIAS (0..1) ── (0..*) EVENTOS -->
+    <path d="M 465,165 L 380,165" marker-start="url(#er-zero-one)" marker-end="url(#er-many)"/>
+    <!-- SUBCATEGORIAS (0..1) ── (0..*) EVENTOS -->
+    <path d="M 465,360 L 380,360" marker-start="url(#er-zero-one)" marker-end="url(#er-many)"/>
+
+    <!-- CATEGORIAS (0..1) ── (0..*) TAREAS -->
+    <path d="M 735,165 L 820,165" marker-start="url(#er-zero-one)" marker-end="url(#er-many)"/>
+    <!-- SUBCATEGORIAS (0..1) ── (0..*) TAREAS -->
+    <path d="M 735,360 L 820,360" marker-start="url(#er-zero-one)" marker-end="url(#er-many)"/>
+
+    <!-- EVENTOS (1) ── (0..1) REGLAS_RECURRENCIA -->
+    <path d="M 190,425 L 190,510" marker-start="url(#er-one)" marker-end="url(#er-zero-one)"/>
+
+    <!-- EVENTOS (0..1) ── (0..1) RECORDATORIOS (XOR) -->
+    <path d="M 325,425 L 325,468 L 510,468 L 510,510" marker-start="url(#er-zero-one)" marker-end="url(#er-zero-one)"/>
+    <!-- TAREAS (0..1) ── (0..1) RECORDATORIOS (XOR) -->
+    <path d="M 885,400 L 885,468 L 690,468 L 690,510" marker-start="url(#er-zero-one)" marker-end="url(#er-zero-one)"/>
+    <path d="M 510,468 L 690,468" stroke="#D97706" stroke-dasharray="5,4"/>
+
+    <!-- EVENTOS (1) ── (0..*) EVENTO_CONTACTO (0..*) ── (1) CONTACTOS -->
+    <path d="M 360,425 L 360,825 L 430,825" marker-start="url(#er-one)" marker-end="url(#er-many)"/>
+    <path d="M 710,825 L 980,825 L 980,775" marker-start="url(#er-many)" marker-end="url(#er-one)"/>
+
+    <!-- TAREAS (1) ── (0..*) TAREA_CONTACTO (0..*) ── (1) CONTACTOS -->
+    <path d="M 1000,400 L 1000,445" marker-start="url(#er-one)" marker-end="url(#er-many)"/>
+    <path d="M 1000,545 L 1000,590" marker-start="url(#er-many)" marker-end="url(#er-one)"/>
+  </g>
+
+  <!-- Etiquetas ER -->
+  <g font-size="11" fill="#475569" font-weight="600">
+    <text x="610" y="270">CASCADE</text>
+    <text x="392" y="158">SET NULL</text>
+    <text x="392" y="353">SET NULL</text>
+    <text x="748" y="158">SET NULL</text>
+    <text x="748" y="353">SET NULL</text>
+    <text x="200" y="472">CASCADE</text>
+    <rect x="572" y="456" width="56" height="22" rx="11" fill="#FEF3C7" stroke="#D97706" stroke-width="1.2"/>
+    <text x="600" y="471" text-anchor="middle" fill="#B45309">XOR</text>
+    <text x="1010" y="430">CASCADE</text>
+    <text x="1010" y="575">CASCADE</text>
+    <text x="745" y="818">CASCADE (solo tabla puente — RN-13)</text>
+  </g>
+
+  <!-- ========================================================= -->
+  <!-- TABLAS RELACIONALES                                        -->
+  <!-- ========================================================= -->
+
+  <!-- EVENTOS -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="100" width="340" height="325" rx="8" fill="#FFFFFF" stroke="#2563EB" stroke-width="1.8"/>
+    <path d="M 40,108 Q 40,100 48,100 L 372,100 Q 380,100 380,108 L 380,136 L 40,136 Z" fill="#2563EB"/>
+    <text x="210" y="123" text-anchor="middle" font-size="14.5" font-weight="700" fill="#FFFFFF">EVENTOS</text>
+    <g font-size="11.8" fill="#1E293B">
+      <text x="54" y="158" font-weight="700">PK  id : TEXT (UUIDv4)</text>
+      <text x="54" y="178">    titulo : TEXT NOT NULL</text>
+      <text x="54" y="198">    descripcion : TEXT</text>
+      <text x="54" y="218">    fecha_inicio : TEXT NOT NULL (UTC)</text>
+      <text x="54" y="238">    fecha_fin : TEXT (CHECK &gt;= inicio)</text>
+      <text x="54" y="258">    todo_el_dia : INTEGER (0/1)</text>
+      <text x="54" y="278">    ubicacion : TEXT</text>
+      <text x="54" y="298">    color_hex : TEXT</text>
+      <text x="54" y="318" fill="#4338CA">FK  categoria_id : TEXT (SET NULL)</text>
+      <text x="54" y="338" fill="#4338CA">FK  subcategoria_id : TEXT (SET NULL)</text>
+      <text x="54" y="362" fill="#64748B">    created_at : TEXT (UTC)</text>
+      <text x="54" y="382" fill="#64748B">    updated_at : TEXT (UTC)</text>
+      <text x="54" y="408" font-size="11" fill="#1D4ED8">IDX (fecha_inicio, fecha_fin) — RN-11</text>
+    </g>
+  </g>
+
+  <!-- CATEGORIAS -->
+  <g filter="url(#shadow)">
+    <rect x="465" y="100" width="270" height="135" rx="8" fill="#FFFFFF" stroke="#6366F1" stroke-width="1.8"/>
+    <path d="M 465,108 Q 465,100 473,100 L 727,100 Q 735,100 735,108 L 735,134 L 465,134 Z" fill="#6366F1"/>
+    <text x="600" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">CATEGORIAS</text>
+    <g font-size="11.8" fill="#1E293B">
+      <text x="479" y="155" font-weight="700">PK  id : TEXT (UUIDv4)</text>
+      <text x="479" y="174">    nombre : TEXT NOT NULL</text>
+      <text x="479" y="193">    color_hex : TEXT | icono : TEXT</text>
+      <text x="479" y="216" fill="#64748B">    created_at, updated_at : TEXT</text>
+    </g>
+  </g>
+
+  <!-- SUBCATEGORIAS -->
+  <g filter="url(#shadow)">
+    <rect x="465" y="295" width="270" height="130" rx="8" fill="#FFFFFF" stroke="#6366F1" stroke-width="1.8"/>
+    <path d="M 465,303 Q 465,295 473,295 L 727,295 Q 735,295 735,303 L 735,329 L 465,329 Z" fill="#818CF8"/>
+    <text x="600" y="317" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">SUBCATEGORIAS</text>
+    <g font-size="11.8" fill="#1E293B">
+      <text x="479" y="350" font-weight="700">PK  id : TEXT (UUIDv4)</text>
+      <text x="479" y="369" fill="#4338CA">FK  categoria_id : TEXT NOT NULL</text>
+      <text x="479" y="388">    nombre : TEXT | color_hex : TEXT</text>
+      <text x="479" y="410" fill="#64748B">    created_at, updated_at : TEXT</text>
+    </g>
+  </g>
+
+  <!-- TAREAS -->
+  <g filter="url(#shadow)">
+    <rect x="820" y="100" width="350" height="300" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="1.8"/>
+    <path d="M 820,108 Q 820,100 828,100 L 1162,100 Q 1170,100 1170,108 L 1170,136 L 820,136 Z" fill="#059669"/>
+    <text x="995" y="123" text-anchor="middle" font-size="14.5" font-weight="700" fill="#FFFFFF">TAREAS</text>
+    <g font-size="11.8" fill="#1E293B">
+      <text x="834" y="158" font-weight="700">PK  id : TEXT (UUIDv4)</text>
+      <text x="834" y="178">    titulo : TEXT NOT NULL</text>
+      <text x="834" y="198">    descripcion : TEXT</text>
+      <text x="834" y="218">    fecha_limite : TEXT (UTC)</text>
+      <text x="834" y="238">    prioridad : TEXT (BAJA|MEDIA|ALTA)</text>
+      <text x="834" y="258">    estado : TEXT (PEND|EN_PROG|COMP)</text>
+      <text x="834" y="280" fill="#4338CA">FK  categoria_id : TEXT (SET NULL)</text>
+      <text x="834" y="300" fill="#4338CA">FK  subcategoria_id : TEXT (SET NULL)</text>
+      <text x="834" y="325" fill="#64748B">    created_at : TEXT (UTC)</text>
+      <text x="834" y="345" fill="#64748B">    updated_at : TEXT (UTC)</text>
+      <text x="834" y="376" font-size="11" fill="#047857">Módulo independiente — RN-07, RN-12</text>
+    </g>
+  </g>
+
+  <!-- CONFIGURACION_SISTEMA -->
+  <g filter="url(#shadow)">
+    <rect x="1220" y="100" width="320" height="295" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.8"/>
+    <path d="M 1220,108 Q 1220,100 1228,100 L 1532,100 Q 1540,100 1540,108 L 1540,136 L 1220,136 Z" fill="#0F766E"/>
+    <text x="1380" y="123" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">CONFIGURACION_SISTEMA</text>
+    <g font-size="11.6" fill="#1E293B">
+      <text x="1234" y="158" font-weight="700">PK  id : TEXT (Singleton UUID)</text>
+      <text x="1234" y="178">    minutos_posponer_defecto : INT (10)</text>
+      <text x="1234" y="198">    antelacion_defecto_min : INT (15)</text>
+      <text x="1234" y="218">    sonido_notificaciones : INT (1)</text>
+      <text x="1234" y="238">    mostrar_perdidas_inicio : INT (1)</text>
+      <text x="1234" y="258">    formato_24h : INT (1)</text>
+      <text x="1234" y="278">    primer_dia_semana : INT (1..7)</text>
+      <text x="1234" y="298">    vista_inicial_agenda : TEXT (MES)</text>
+      <text x="1234" y="318">    tema_oscuro : INT (0)</text>
+      <text x="1234" y="344" fill="#64748B">    updated_at : TEXT (UTC)</text>
+      <text x="1234" y="374" font-size="11" fill="#0F766E">Parametrización global — RN-14</text>
+    </g>
+  </g>
+
+  <!-- REGLAS_RECURRENCIA -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="510" width="300" height="215" rx="8" fill="#FFFFFF" stroke="#2563EB" stroke-width="1.8"/>
+    <path d="M 40,518 Q 40,510 48,510 L 332,510 Q 340,510 340,518 L 340,544 L 40,544 Z" fill="#3B82F6"/>
+    <text x="190" y="532" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">REGLAS_RECURRENCIA</text>
+    <g font-size="11.6" fill="#1E293B">
+      <text x="54" y="566" font-weight="700">PK  id : TEXT (UUIDv4)</text>
+      <text x="54" y="585" fill="#1D4ED8">FK  evento_id : TEXT UNIQUE (CASCADE)</text>
+      <text x="54" y="604">    frecuencia : TEXT NOT NULL</text>
+      <text x="54" y="623">    intervalo : INTEGER DEFAULT 1</text>
+      <text x="54" y="642">    dias_semana : TEXT</text>
+      <text x="54" y="661">    fecha_fin_recurrencia : TEXT</text>
+      <text x="54" y="680">    max_ocurrencias : INTEGER</text>
+      <text x="54" y="704" fill="#64748B">    created_at, updated_at : TEXT</text>
+    </g>
+  </g>
+
+  <!-- RECORDATORIOS -->
+  <g filter="url(#shadow)">
+    <rect x="410" y="510" width="380" height="250" rx="8" fill="#FFFFFF" stroke="#D97706" stroke-width="2"/>
+    <path d="M 410,518 Q 410,510 418,510 L 782,510 Q 790,510 790,518 L 790,544 L 410,544 Z" fill="#D97706"/>
+    <text x="600" y="532" text-anchor="middle" font-size="14.5" font-weight="700" fill="#FFFFFF">RECORDATORIOS</text>
+    <g font-size="11.6" fill="#1E293B">
+      <text x="424" y="566" font-weight="700">PK  id : TEXT (UUIDv4)</text>
+      <text x="424" y="585">    tipo_origen : TEXT (EVENTO|TAREA)</text>
+      <text x="424" y="604" fill="#B45309">FK  evento_id : TEXT UNIQUE (XOR, CASCADE)</text>
+      <text x="424" y="623" fill="#B45309">FK  tarea_id : TEXT UNIQUE (XOR, CASCADE)</text>
+      <text x="424" y="642">    antelacion_minutos : INT CHECK (0..10080)</text>
+      <text x="424" y="661">    fecha_disparo : TEXT NOT NULL (UTC)</text>
+      <text x="424" y="680">    estado : TEXT NOT NULL</text>
+      <text x="424" y="699">    id_notificacion_so : TEXT</text>
+      <text x="424" y="720" fill="#64748B">    created_at, updated_at : TEXT</text>
+      <text x="424" y="744" font-size="11" fill="#B45309">IDX (estado, fecha_disparo) — Barrido RN-05</text>
+    </g>
+  </g>
+
+  <!-- TAREA_CONTACTO (Tabla Puente N:M) -->
+  <g filter="url(#shadow)">
+    <rect x="855" y="445" width="290" height="100" rx="8" fill="#FFFFFF" stroke="#64748B" stroke-width="1.6"/>
+    <path d="M 855,453 Q 855,445 863,445 L 1137,445 Q 1145,445 1145,453 L 1145,477 L 855,477 Z" fill="#475569"/>
+    <text x="1000" y="466" text-anchor="middle" font-size="13" font-weight="700" fill="#FFFFFF">TAREA_CONTACTO (N:M)</text>
+    <g font-size="11.5" fill="#1E293B">
+      <text x="869" y="497" font-weight="700">PK,FK tarea_id : TEXT (CASCADE)</text>
+      <text x="869" y="516" font-weight="700">PK,FK contacto_id : TEXT (CASCADE)</text>
+      <text x="869" y="534" fill="#64748B">      created_at : TEXT (UTC)</text>
+    </g>
+  </g>
+
+  <!-- CONTACTOS -->
+  <g filter="url(#shadow)">
+    <rect x="855" y="590" width="290" height="185" rx="8" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.8"/>
+    <path d="M 855,598 Q 855,590 863,590 L 1137,590 Q 1145,590 1145,598 L 1145,624 L 855,624 Z" fill="#7C3AED"/>
+    <text x="1000" y="612" text-anchor="middle" font-size="14.5" font-weight="700" fill="#FFFFFF">CONTACTOS</text>
+    <g font-size="11.8" fill="#1E293B">
+      <text x="869" y="646" font-weight="700">PK  id : TEXT (UUIDv4)</text>
+      <text x="869" y="665">    nombre : TEXT NOT NULL</text>
+      <text x="869" y="684">    telefono : TEXT</text>
+      <text x="869" y="703">    correo : TEXT</text>
+      <text x="869" y="722">    notas : TEXT | etiqueta : TEXT</text>
+      <text x="869" y="746" fill="#64748B">    created_at, updated_at : TEXT</text>
+    </g>
+  </g>
+
+  <!-- EVENTO_CONTACTO (Tabla Puente N:M) -->
+  <g filter="url(#shadow)">
+    <rect x="430" y="785" width="280" height="100" rx="8" fill="#FFFFFF" stroke="#64748B" stroke-width="1.6"/>
+    <path d="M 430,793 Q 430,785 438,785 L 702,785 Q 710,785 710,793 L 710,817 L 430,817 Z" fill="#475569"/>
+    <text x="570" y="806" text-anchor="middle" font-size="13" font-weight="700" fill="#FFFFFF">EVENTO_CONTACTO (N:M)</text>
+    <g font-size="11.5" fill="#1E293B">
+      <text x="444" y="837" font-weight="700">PK,FK evento_id : TEXT (CASCADE)</text>
+      <text x="444" y="856" font-weight="700">PK,FK contacto_id : TEXT (CASCADE)</text>
+      <text x="444" y="874" fill="#64748B">      created_at : TEXT (UTC)</text>
+    </g>
+  </g>
+
+  <!-- LEYENDA INTEGRIDAD -->
+  <g filter="url(#shadow)">
+    <rect x="1220" y="450" width="320" height="230" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.4"/>
+    <text x="1236" y="478" font-size="13.5" font-weight="700" fill="#1E3A8A">Invariantes del Esquema Relacional</text>
+    <line x1="1236" y1="488" x2="1524" y2="488" stroke="#BFDBFE" stroke-width="1"/>
+    <g font-size="11.5" fill="#1E40AF">
+      <text x="1236" y="512">1. Todas las PK son UUIDv4 (TEXT) para</text>
+      <text x="1248" y="528">soportar sincronización futura (RN-10).</text>
+      <text x="1236" y="552">2. RECORDATORIOS impone arco XOR:</text>
+      <text x="1248" y="568">evento_id XOR tarea_id + UNIQUE.</text>
+      <text x="1236" y="592">3. Borrar un CONTACTO solo elimina filas</text>
+      <text x="1248" y="608">en EVENTO_CONTACTO / TAREA_CONTACTO,</text>
+      <text x="1248" y="624">conservando eventos y tareas (RN-13).</text>
+      <text x="1236" y="648">4. Borrar CATEGORIA/SUBCATEGORIA aplica</text>
+      <text x="1248" y="664">SET NULL sobre eventos y tareas (RN-13).</text>
+    </g>
+  </g>
+</svg>
