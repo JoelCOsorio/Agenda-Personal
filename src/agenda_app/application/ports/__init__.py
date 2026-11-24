@@ -1,5 +1,6 @@
 """Puertos (Protocols) de entrada/salida para Inversión de Dependencias (DIP)."""
 
+from agenda_app.application.ports.acciones_externas import ILanzadorAccionesExternas
 from agenda_app.application.ports.notificaciones import (
     ACCION_COMPLETAR_TAREA,
     ACCION_MARCAR_VISTO,
@@ -15,7 +16,11 @@ from agenda_app.application.ports.notificaciones import (
 from agenda_app.application.ports.reloj import IReloj
 from agenda_app.application.ports.repositorios import (
     IRepositorioAjustes,
+    IRepositorioCategorias,
+    IRepositorioContactos,
+    IRepositorioEventos,
     IRepositorioRecordatorios,
+    IRepositorioTareas,
 )
 
 __all__ = [
@@ -27,9 +32,14 @@ __all__ = [
     "ContenidoNotificacion",
     "EventoInteraccionNotificacion",
     "IAdaptadorNotificaciones",
+    "ILanzadorAccionesExternas",
     "IProveedorContenidoRecordatorio",
     "IReloj",
     "IRepositorioAjustes",
+    "IRepositorioCategorias",
+    "IRepositorioContactos",
+    "IRepositorioEventos",
     "IRepositorioRecordatorios",
+    "IRepositorioTareas",
     "SolicitudNotificacion",
 ]
