@@ -65,7 +65,6 @@ jobs:
         with:
           name: atempo-${{ matrix.target }}
           path: ${{ steps.build.outputs.archive-path }}
-          archive: false
           if-no-files-found: error
           overwrite: false
 
