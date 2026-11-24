@@ -279,5 +279,5 @@ class ServicioTareas:
             subcategoria_id, categoria_id
         ):
             raise JerarquiaCategoriaInvalidaError(
-                "RN-09: La subcategoría seleccionada no pertenece a la categoría padre."
+                "La subcategoría seleccionada no pertenece a la categoría padre."
             )

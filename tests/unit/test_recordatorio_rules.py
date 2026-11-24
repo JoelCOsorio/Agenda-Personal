@@ -27,7 +27,7 @@ def test_validar_disparo_permite_hasta_7_dias_exactos() -> None:
 
 def test_validar_disparo_rechaza_mas_de_7_dias() -> None:
     objetivo = BASE_AHORA + timedelta(days=10)
-    with pytest.raises(RecordatorioInvalidoError, match="RN-03"):
+    with pytest.raises(RecordatorioInvalidoError, match="7 días"):
         ValidadorRecordatorio.calcular_y_validar_disparo(
             fecha_objetivo=objetivo,
             antelacion_minutos=MAX_ANTELACION_MINUTOS + 1,
@@ -44,7 +44,7 @@ def test_validar_disparo_rechaza_antelacion_negativa_y_pasado() -> None:
         )
 
     # Objetivo en 10 min con antelación de 30 min cae en el pasado
-    with pytest.raises(RecordatorioInvalidoError, match="RN-03"):
+    with pytest.raises(RecordatorioInvalidoError, match="ya transcurrió"):
         ValidadorRecordatorio.calcular_y_validar_disparo(
             fecha_objetivo=BASE_AHORA + timedelta(minutes=10),
             antelacion_minutos=30,

@@ -80,7 +80,7 @@ class ServicioCategorias:
     ) -> Subcategoria:
         if self._repo.obtener_categoria(categoria_id) is None:
             raise JerarquiaCategoriaInvalidaError(
-                f"RN-09: No existe la categoría padre {categoria_id}."
+                f"No existe la categoría padre {categoria_id}."
             )
         ahora = self._reloj.ahora_utc()
         sub = Subcategoria(
@@ -110,9 +110,9 @@ class ServicioCategorias:
             return
         if categoria_id is None:
             raise JerarquiaCategoriaInvalidaError(
-                "RN-09: Para asignar una subcategoría se debe indicar su categoría padre."
+                "Para asignar una subcategoría se debe indicar su categoría padre."
             )
         if not self._repo.subcategoria_pertenece_a(subcategoria_id, categoria_id):
             raise JerarquiaCategoriaInvalidaError(
-                "RN-09: La subcategoría seleccionada no pertenece a la categoría padre."
+                "La subcategoría seleccionada no pertenece a la categoría padre."
             )

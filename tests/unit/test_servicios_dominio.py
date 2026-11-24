@@ -180,7 +180,7 @@ async def test_contactos_acciones_por_plataforma_rn08_y_categorias_rn09() -> Non
         assert await app_lin.servicio_contactos.abrir_correo_contacto(c.id) is True
         assert lanz_lin.uris_abiertas == ["mailto:garcia@uni.edu"]
 
-        with pytest.raises(AccionPlataformaNoSoportadaError, match="RN-08"):
+        with pytest.raises(AccionPlataformaNoSoportadaError, match="llamadas telefónicas"):
             await app_lin.servicio_contactos.llamar_contacto(c.id)
 
         # Validar RN-09: subcategoría de otra categoría padre es rechazada
@@ -189,7 +189,7 @@ async def test_contactos_acciones_por_plataforma_rn08_y_categorias_rn09() -> Non
         sub_cal = app_lin.servicio_categorias.crear_subcategoria(
             categoria_id=cat_uni.id, nombre="Cálculo"
         )
-        with pytest.raises(JerarquiaCategoriaInvalidaError, match="RN-09"):
+        with pytest.raises(JerarquiaCategoriaInvalidaError, match="categoría padre"):
             app_lin.servicio_categorias.validar_jerarquia(cat_per.id, sub_cal.id)
     finally:
         app_lin.db.cerrar()

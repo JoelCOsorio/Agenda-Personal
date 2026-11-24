@@ -53,7 +53,7 @@ class Subcategoria(EntidadBase):
         super().__post_init__()
         if self.categoria_id is None:
             raise ValidacionEntidadError(
-                "RN-09: Toda subcategoría debe pertenecer a una categoría padre."
+                "Toda subcategoría debe pertenecer a una categoría padre."
             )
         self.nombre = self.nombre.strip()
         if not self.nombre:

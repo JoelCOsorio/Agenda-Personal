@@ -18,7 +18,7 @@ def _dt(anio: int, mes: int, dia: int, hora: int, minuto: int = 0) -> datetime:
 
 
 def test_evento_rechaza_fecha_fin_anterior_a_inicio_rn01() -> None:
-    with pytest.raises(RangoTemporalInvalidoError, match="RN-01"):
+    with pytest.raises(RangoTemporalInvalidoError, match="mayor o igual"):
         Evento(
             titulo="Inconsistente",
             fecha_inicio=_dt(2026, 11, 24, 12, 0),

@@ -1,11 +1,11 @@
 [project]
 name = "agenda-personal"
-version = "0.1.0"
-description = ""
+version = "1.0.0"
+description = "Aplicación multiplataforma de Agenda Personal y Académica con notificaciones nativas (Android, Windows y Linux)."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Flet developer", email = "you@example.com" }
+    { name = "Joel Cornelio", email = "joelosorio2006@gmail.com" }
 ]
 dependencies = [
     "flet>=1.1.2",
@@ -31,10 +31,10 @@ pythonpath = ["src"]
 
 [tool.flet]
 desktop_flavor = "light"    # Change to "full" to use flet-audio and flet-video
-org = "com.mycompany"
-product = "agenda-personal"
-company = "Flet"
-copyright = "Copyright (C) 2023-2026 by Flet"
+org = "com.joelcornelio"
+product = "Agenda Personal"
+company = "Joel Cornelio"
+copyright = "Copyright (C) 2026 Joel Cornelio"
 
 # src/assets/icon.png is the icon for every platform. Keep it transparent and
 # filling the whole canvas: web, Windows and Linux show it as-is, and Flet

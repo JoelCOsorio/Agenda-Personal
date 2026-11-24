@@ -37,7 +37,7 @@ class Recordatorio(EntidadBase):
 
         if not (0 <= self.antelacion_minutos <= MAX_ANTELACION_MINUTOS):
             raise RecordatorioInvalidoError(
-                f"RN-03: La antelación debe estar entre 0 y {MAX_ANTELACION_MINUTOS} minutos (7 días)."
+                f"La antelación debe estar entre 0 y {MAX_ANTELACION_MINUTOS} minutos (7 días)."
             )
 
         if self.tipo_origen == TipoOrigenRecordatorio.EVENTO:
@@ -99,7 +99,7 @@ class Recordatorio(EntidadBase):
         """Restablece el recordatorio a PENDIENTE tras cambiar fecha/hora o reactivar (RN-02, RN-12)."""
         if not (0 <= nueva_antelacion_minutos <= MAX_ANTELACION_MINUTOS):
             raise RecordatorioInvalidoError(
-                f"RN-03: La antelación debe estar entre 0 y {MAX_ANTELACION_MINUTOS} minutos (7 días)."
+                f"La antelación debe estar entre 0 y {MAX_ANTELACION_MINUTOS} minutos (7 días)."
             )
         self.antelacion_minutos = nueva_antelacion_minutos
         self.fecha_disparo = asegurar_utc(nueva_fecha_disparo)

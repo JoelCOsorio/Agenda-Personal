@@ -31,7 +31,7 @@ class RangoHorario:
             fin_utc = asegurar_utc(self.fin)
             if fin_utc < ini:
                 raise RangoTemporalInvalidoError(
-                    "RN-01: La fecha/hora de fin no puede ser anterior a la de inicio."
+                    "La fecha/hora de fin no puede ser anterior a la de inicio."
                 )
             object.__setattr__(self, "fin", fin_utc)
 
@@ -99,7 +99,7 @@ class Evento(EntidadBase):
             self.fecha_fin = asegurar_utc(self.fecha_fin)
             if not self.todo_el_dia and self.fecha_fin < self.fecha_inicio:
                 raise RangoTemporalInvalidoError(
-                    "RN-01: La fecha/hora de fin debe ser mayor o igual a la fecha/hora de inicio."
+                    "La fecha/hora de fin debe ser mayor o igual a la fecha/hora de inicio."
                 )
 
         self.color_hex = validar_color_hex(self.color_hex)
@@ -125,7 +125,7 @@ class Evento(EntidadBase):
         fin_utc = asegurar_utc(nuevo_fin) if nuevo_fin is not None else None
         if not self.todo_el_dia and fin_utc is not None and fin_utc < inicio_utc:
             raise RangoTemporalInvalidoError(
-                "RN-01: La fecha/hora de fin debe ser mayor o igual a la fecha/hora de inicio."
+                "La fecha/hora de fin debe ser mayor o igual a la fecha/hora de inicio."
             )
         self.fecha_inicio = inicio_utc
         self.fecha_fin = fin_utc

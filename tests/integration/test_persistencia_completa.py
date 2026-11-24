@@ -179,3 +179,52 @@ async def test_persistencia_completa_integridad_rn13_y_callback_notificacion(tmp
     assert cfg.minutos_posponer_defecto == 10
     assert cfg.vista_inicial_agenda == VistaAgenda.MES
     assert cfg.tema_oscuro is False
+
+
+@pytest.mark.asyncio
+async def test_startup_reconciler_avanza_recordatorio_de_evento_recurrente(
+    tmp_path: Path,
+) -> None:
+    db_file = tmp_path / "agenda_recurrencia.db"
+    # Lunes 2026-11-23 18:00 UTC
+    reloj = FixedClock(datetime(2026, 11, 23, 18, 0, tzinfo=timezone.utc))
+    adaptador = StubAdapter()
+
+    app = construir_contenedor_aplicacion(
+        db_path=db_file,
+        reloj=reloj,
+        adaptador_personalizado=adaptador,
+    )
+
+    evento = await app.servicio_eventos.crear_evento(
+        titulo="Clase Semanal",
+        fecha_inicio=datetime(2026, 11, 23, 20, 0, tzinfo=timezone.utc),  # Lunes 20:00
+        fecha_fin=datetime(2026, 11, 23, 21, 0, tzinfo=timezone.utc),
+        recurrencia=ReglaRecurrencia(
+            frecuencia=TipoFrecuencia.SEMANAL,
+            intervalo=1,
+            dias_semana=("LU", "MI"),
+            max_ocurrencias=4,
+        ),
+        recordatorio_antelacion_min=30,
+    )
+
+    rec = app.repo_recordatorios.obtener_por_item(TipoOrigenRecordatorio.EVENTO, evento.id)
+    assert rec is not None
+    assert rec.fecha_disparo == datetime(2026, 11, 23, 19, 30, tzinfo=timezone.utc)
+
+    # Simulamos que la clase del lunes ya se notificó y el usuario la atendió
+    await app.motor.marcar_atendido(rec.id)
+    reloj.dt = datetime(2026, 11, 23, 22, 0, tzinfo=timezone.utc)
+
+    res = await app.reconciliador.reconciliar()
+    assert res.recurrencias_avanzadas == 1
+
+    rec_siguiente = app.repo_recordatorios.obtener_por_item(
+        TipoOrigenRecordatorio.EVENTO, evento.id
+    )
+    assert rec_siguiente is not None
+    assert rec_siguiente.estado == EstadoRecordatorio.PENDIENTE
+    # Miércoles 2026-11-25 20:00 - 30 min = 19:30 UTC
+    assert rec_siguiente.fecha_disparo == datetime(2026, 11, 25, 19, 30, tzinfo=timezone.utc)
+
