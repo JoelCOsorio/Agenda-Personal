@@ -8,7 +8,9 @@ authors = [
     { name = "Flet developer", email = "you@example.com" }
 ]
 dependencies = [
-    "flet>=1.1.2"
+    "flet>=1.1.2",
+    "flet-notifications",
+    "desktop-notifier; sys_platform == 'linux'",
 ]
 
 [dependency-groups]
@@ -42,3 +44,21 @@ copyright = "Copyright (C) 2023-2026 by Flet"
 
 [tool.flet.app]
 path = "src"
+
+[tool.flet.android.permission]
+"android.permission.POST_NOTIFICATIONS" = true
+"android.permission.RECEIVE_BOOT_COMPLETED" = true
+"android.permission.SCHEDULE_EXACT_ALARM" = true
+
+[tool.flet.android.receiver."com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"]
+exported = false
+
+[tool.flet.android.receiver."com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"]
+exported = false
+
+[[tool.flet.android.receiver."com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver".intent_filter]]
+actions = [
+    "android.intent.action.BOOT_COMPLETED",
+    "android.intent.action.MY_PACKAGE_REPLACED",
+    "android.intent.action.QUICKBOOT_POWERON",
+]
