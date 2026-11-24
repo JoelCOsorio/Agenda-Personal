@@ -118,7 +118,7 @@ class ServicioContactos:
         """Lanza la app de llamadas (tel:) únicamente en Android (RN-08)."""
         if self._plataforma != PlataformaSO.ANDROID:
             raise AccionPlataformaNoSoportadaError(
-                f"RN-08: Las llamadas telefónicas no están disponibles en {self._plataforma.value}."
+                f"Las llamadas telefónicas no están disponibles en {self._plataforma.value}."
             )
         contacto = self._repo.obtener_por_id(contacto_id)
         if contacto is None:

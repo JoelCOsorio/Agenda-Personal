@@ -234,7 +234,7 @@ class ContactosView:
                 title=ft.Text("Eliminar contacto"),
                 content=ft.Text(
                     f"¿Deseas eliminar a '{contacto.nombre}'? "
-                    "Los eventos y tareas vinculados se conservarán desvinculados (RN-13)."
+                    "Los eventos y tareas vinculados se conservarán sin este contacto."
                 ),
                 actions=[
                     ft.TextButton("Cancelar", on_click=lambda _: self._page.pop_dialog()),

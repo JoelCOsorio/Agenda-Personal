@@ -257,7 +257,7 @@ class ServicioEventos:
         conflicto = DetectorSolapamiento.buscar_conflicto(candidato, existentes)
         if conflicto is not None:
             raise ChoqueEventosError(
-                f"RN-11: Choque de horario con el evento '{conflicto.evento_existente.titulo}' "
+                f"Choque de horario con el evento '{conflicto.evento_existente.titulo}' "
                 f"({conflicto.inicio_conflicto.strftime('%Y-%m-%d %H:%M UTC')}).",
                 evento_en_conflicto_id=conflicto.evento_existente.id,
                 titulo_conflicto=conflicto.evento_existente.titulo,
@@ -276,7 +276,7 @@ class ServicioEventos:
             subcategoria_id, categoria_id
         ):
             raise JerarquiaCategoriaInvalidaError(
-                "RN-09: La subcategoría seleccionada no pertenece a la categoría padre."
+                "La subcategoría seleccionada no pertenece a la categoría padre."
             )
 
     @staticmethod

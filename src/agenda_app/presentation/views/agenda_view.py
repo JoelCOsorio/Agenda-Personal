@@ -328,7 +328,7 @@ class AgendaView:
                 )
 
         dialogo = ft.AlertDialog(
-            title=ft.Text("Historial de eventos pasados (RN-04)"),
+            title=ft.Text("Historial de eventos pasados"),
             content=ft.Container(
                 width=460,
                 height=360,

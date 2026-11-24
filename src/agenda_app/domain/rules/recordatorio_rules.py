@@ -31,7 +31,7 @@ class ValidadorRecordatorio:
     def validar_antelacion(antelacion_minutos: int) -> None:
         if antelacion_minutos < 0 or antelacion_minutos > MAX_ANTELACION_MINUTOS:
             raise RecordatorioInvalidoError(
-                f"RN-03: La antelación debe estar entre 0 y {MAX_ANTELACION_MINUTOS} minutos (7 días)."
+                f"La antelación debe estar entre 0 y {MAX_ANTELACION_MINUTOS} minutos (7 días)."
             )
 
     @classmethod
@@ -52,7 +52,7 @@ class ValidadorRecordatorio:
 
         if fecha_disparo < umbral_minimo:
             raise RecordatorioInvalidoError(
-                "RN-03: La fecha y hora calculada para la notificación ya transcurrió o es demasiado próxima."
+                "La fecha y hora calculada para la notificación ya transcurrió o es demasiado próxima."
             )
         return fecha_disparo
 

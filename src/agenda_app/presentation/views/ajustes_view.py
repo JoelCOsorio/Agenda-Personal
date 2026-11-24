@@ -47,7 +47,7 @@ class AjustesView:
             on_change=self._guardar_preferencias,
         )
         self._perdidas_inicio_sw = ft.Switch(
-            label="Mostrar alertas perdidas al iniciar (RN-05)",
+            label="Mostrar alertas perdidas al iniciar",
             on_change=self._guardar_preferencias,
         )
         self._snooze_field = ft.TextField(
@@ -106,7 +106,7 @@ class AjustesView:
                     ],
                 ),
                 self._tarjeta_seccion(
-                    "Motor de Notificaciones (RN-14)",
+                    "Notificaciones",
                     ft.Icons.NOTIFICATIONS_OUTLINED,
                     [
                         self._sonido_sw,
@@ -185,7 +185,7 @@ class AjustesView:
         caps = await self._contenedor.adaptador.obtener_capacidades()
         self._diag_txt.value = (
             f"Sistema detectado: {caps.plataforma.value} | "
-            f"Acciones rápidas: {'Sí' if caps.soporta_acciones_rapidas else 'Degradado (RN-06)'} | "
+            f"Acciones rápidas: {'Sí' if caps.soporta_acciones_rapidas else 'No soportado en este entorno'} | "
             f"Alarmas exactas: {'Sí' if caps.soporta_alarmas_exactas else 'Inexactas'} | "
             f"Base de datos: {self._contenedor.db.db_path}"
         )
