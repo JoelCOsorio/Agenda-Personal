@@ -136,6 +136,7 @@ def construir_contenedor_aplicacion(
     reconciliador = StartupReconciler(
         repo_recordatorios=repo_recordatorios,
         repo_ajustes=repo_ajustes,
+        repo_eventos=repo_eventos,
         motor=motor,
         adaptador=adaptador,
         reloj=reloj_activo,

@@ -184,6 +184,18 @@ class RepositorioEventosSQLite:
             ).fetchall()
             return [self._hidratar_evento(conn, f) for f in filas]
 
+    def listar_recurrentes(self) -> list[Evento]:
+        with self._db.transaccion() as conn:
+            filas = conn.execute(
+                """
+                SELECT e.*
+                FROM eventos e
+                INNER JOIN reglas_recurrencia r ON r.evento_id = e.id
+                ORDER BY e.fecha_inicio ASC
+                """
+            ).fetchall()
+            return [self._hidratar_evento(conn, f) for f in filas]
+
     def eliminar(self, evento_id: UUID) -> None:
         with self._db.transaccion() as conn:
             conn.execute("DELETE FROM eventos WHERE id = ?", (str(evento_id),))
