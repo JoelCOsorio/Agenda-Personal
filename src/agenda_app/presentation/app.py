@@ -42,7 +42,7 @@ class AgendaApp:
         )
 
     async def iniciar(self) -> None:
-        self._page.title = "Agenda Personal"
+        self._page.title = "Atempo — Agenda Personal"
         aplicar_tema(self._page, self._contenedor.servicio_ajustes.obtener())
         self._page.on_app_lifecycle_state_change = self._on_lifecycle_change
 

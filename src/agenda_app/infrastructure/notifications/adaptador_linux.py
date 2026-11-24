@@ -30,7 +30,7 @@ async def _detectar_acciones_dbus_por_defecto() -> bool:
     try:
         from desktop_notifier import Capability, DesktopNotifier
 
-        notifier = DesktopNotifier(app_name="Agenda Personal")
+        notifier = DesktopNotifier(app_name="Atempo")
         caps = await notifier.get_capabilities()
         return Capability.BUTTONS in caps
     except Exception:

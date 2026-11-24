@@ -54,7 +54,7 @@ class LinuxNotificationWorker:
     async def ejecutar(self) -> None:
         from desktop_notifier import Button, Capability, DEFAULT_SOUND, DesktopNotifier, Urgency
 
-        notifier = DesktopNotifier(app_name="Agenda Personal")
+        notifier = DesktopNotifier(app_name="Atempo")
         caps = await notifier.get_capabilities()
         soporta_botones = Capability.BUTTONS in caps
         loop = asyncio.get_running_loop()

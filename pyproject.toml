@@ -32,9 +32,10 @@ pythonpath = ["src"]
 [tool.flet]
 desktop_flavor = "light"    # Change to "full" to use flet-audio and flet-video
 org = "com.joelcornelio"
-product = "Agenda Personal"
+product = "Atempo"
 company = "Joel Cornelio"
 copyright = "Copyright (C) 2026 Joel Cornelio"
+icon_background = "#EEF2FF"
 
 # src/assets/icon.png is the icon for every platform. Keep it transparent and
 # filling the whole canvas: web, Windows and Linux show it as-is, and Flet

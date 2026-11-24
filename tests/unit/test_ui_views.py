@@ -121,7 +121,7 @@ async def test_ui_navegacion_vistas_dialogos_responsividad_y_tema() -> None:
         app = AgendaApp(page, cont)  # type: ignore[arg-type]
         await app.iniciar()
 
-        assert page.title == "Agenda Personal"
+        assert page.title == "Atempo — Agenda Personal"
         assert page.theme_mode == ft.ThemeMode.LIGHT
         assert page.navigation_bar is None  # Escritorio usa NavigationRail
 
