@@ -1,25 +1,14 @@
+"""Punto de entrada principal de Agenda Personal y Académica (Flet 1.x)."""
+
+from __future__ import annotations
+
 import flet as ft
 
+from agenda_app.presentation.app import run_app
 
-def main(page: ft.Page):
-    counter = ft.Text("0", size=50, data=0)
 
-    def increment_click(e: ft.Event[ft.FloatingActionButton]):
-        counter.data += 1
-        counter.value = str(counter.data)
-
-    page.floating_action_button = ft.FloatingActionButton(
-        icon=ft.Icons.ADD, key="increment", on_click=increment_click
-    )
-    page.add(
-        ft.SafeArea(
-            expand=True,
-            content=ft.Container(
-                content=counter,
-                alignment=ft.Alignment.CENTER,
-            ),
-        )
-    )
+async def main(page: ft.Page) -> None:
+    await run_app(page)
 
 
 if __name__ == "__main__":
