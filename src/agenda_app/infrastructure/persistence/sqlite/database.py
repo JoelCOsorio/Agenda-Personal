@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import sqlite3
+import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
 
 class SQLiteDatabase:
-    """Administra conexiones seguras a SQLite 3 (soporta archivos locales y :memory:)."""
+    """Administra conexiones seguras a SQLite 3 (soporta archivos locales, :memory: y WASM)."""
 
     def __init__(self, db_path: Path | str) -> None:
         self._db_path = str(db_path)
@@ -25,7 +26,13 @@ class SQLiteDatabase:
         conn.execute("PRAGMA foreign_keys = ON;")
         conn.execute("PRAGMA busy_timeout = 5000;")
         if not self._es_memoria:
-            conn.execute("PRAGMA journal_mode = WAL;")
+            if sys.platform == "emscripten":
+                conn.execute("PRAGMA journal_mode = MEMORY;")
+            else:
+                try:
+                    conn.execute("PRAGMA journal_mode = WAL;")
+                except sqlite3.OperationalError:
+                    conn.execute("PRAGMA journal_mode = DELETE;")
             conn.execute("PRAGMA synchronous = NORMAL;")
         return conn
 

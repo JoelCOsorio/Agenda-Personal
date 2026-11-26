@@ -1,4 +1,4 @@
-name: Build Multiplataforma (Android, Linux, Windows)
+name: Build Multiplataforma (Android, Linux, Windows, Web)
 
 on:
   push:
@@ -46,6 +46,8 @@ jobs:
             runner: ubuntu-latest
           - target: windows
             runner: windows-latest
+          - target: web
+            runner: ubuntu-latest
 
     steps:
       - name: Checkout del repositorio

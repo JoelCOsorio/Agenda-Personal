@@ -1,7 +1,7 @@
 [project]
 name = "agenda-personal"
 version = "1.0.2"
-description = "Aplicación multiplataforma de Agenda Personal y Académica con notificaciones nativas (Android, Windows y Linux)."
+description = "Aplicación multiplataforma de Agenda Personal y Académica con notificaciones nativas (Android, Windows, Linux y Web)."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
@@ -46,6 +46,12 @@ icon_background = "#EEF2FF"
 
 [tool.flet.app]
 path = "src"
+
+[tool.flet.web]
+route_url_strategy = "hash"
+pwa_short_name = "Atempo"
+pwa_theme_color = "#4F46E5"
+pwa_background_color = "#EEF2FF"
 
 [tool.flet.android.permission]
 "android.permission.POST_NOTIFICATIONS" = true

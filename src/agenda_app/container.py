@@ -81,6 +81,7 @@ ContenedorNotificaciones = ContenedorAplicacion
 def construir_contenedor_aplicacion(
     *,
     page_platform: Any | None = None,
+    is_web: bool = False,
     db_path: Path | str | None = None,
     cliente_flet: Any | None = None,
     url_launcher: Any | None = None,
@@ -89,7 +90,7 @@ def construir_contenedor_aplicacion(
     lanzador_personalizado: ILanzadorAccionesExternas | None = None,
 ) -> ContenedorAplicacion:
     """Ensambla las capas Dominio -> Aplicación -> Infraestructura (DIP)."""
-    plataforma = detectar_plataforma(page_platform)
+    plataforma = detectar_plataforma(page_platform, is_web=is_web)
     reloj_activo: IReloj = reloj if reloj is not None else RelojSistemaUTC()
 
     db = SQLiteDatabase(obtener_ruta_db(db_path))

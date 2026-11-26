@@ -119,6 +119,7 @@ async def run_app(
     """Punto de entrada Flet 1.x desacoplado y testable."""
     contenedor = construir_contenedor_aplicacion(
         page_platform=page.platform,
+        is_web=bool(getattr(page, "web", False)),
         db_path=db_path,
         url_launcher=ft.UrlLauncher(),
     )

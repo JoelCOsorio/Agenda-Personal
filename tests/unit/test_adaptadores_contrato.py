@@ -15,15 +15,21 @@ from agenda_app.application.ports.notificaciones import (
     AccionNotificacion,
     SolicitudNotificacion,
 )
+from agenda_app.domain.entities.contacto import Contacto
+from agenda_app.domain.enums import PlataformaSO
 from agenda_app.infrastructure.notifications.adaptador_android import (
     AdaptadorNotificacionesAndroid,
 )
 from agenda_app.infrastructure.notifications.adaptador_linux import (
     AdaptadorNotificacionesLinux,
 )
+from agenda_app.infrastructure.notifications.adaptador_web import (
+    AdaptadorNotificacionesWeb,
+)
 from agenda_app.infrastructure.notifications.adaptador_windows import (
     AdaptadorNotificacionesWindows,
 )
+from agenda_app.infrastructure.platform.detector_so import detectar_plataforma
 
 
 class FakeFletNotificationsClient:
@@ -155,3 +161,48 @@ async def test_contrato_linux_planificador_asyncio_sin_schedule_y_degradacion() 
         assert cliente.shown_calls[0]["actions"] is None
     finally:
         await adaptador.detener()
+
+
+@pytest.mark.asyncio
+async def test_contrato_web_planificador_asyncio_y_sin_acciones_rapidas() -> None:
+    cliente = FakeFletNotificationsClient(forbid_schedule=True)
+    disparadas: list[int] = []
+
+    async def _on_disparada(s: SolicitudNotificacion) -> None:
+        disparadas.append(s.id_notificacion_so)
+
+    adaptador = AdaptadorNotificacionesWeb(cliente=cliente, on_disparada=_on_disparada)
+    try:
+        caps = await adaptador.obtener_capacidades()
+        assert caps.plataforma == PlataformaSO.WEB
+        assert caps.soporta_programacion_nativa is False
+        assert caps.soporta_acciones_rapidas is False
+
+        await adaptador.programar(_solicitud_ejemplo(id_so=95, segundos=0.5))
+        await adaptador.cancelar(95)
+        await adaptador.programar(_solicitud_ejemplo(id_so=96, segundos=0.08))
+
+        await asyncio.sleep(0.25)
+
+        assert disparadas == [96]
+        assert len(cliente.shown_calls) == 1
+        assert cliente.shown_calls[0]["id"] == 96
+        assert cliente.shown_calls[0]["actions"] is None
+        assert cliente.shown_calls[0]["options"].web is not None
+        assert cliente.shown_calls[0]["options"].web.lang == "es"
+    finally:
+        await adaptador.detener()
+
+
+def test_deteccion_web_y_bloqueo_llamadas() -> None:
+    assert detectar_plataforma("linux", is_web=True) == PlataformaSO.WEB
+    assert detectar_plataforma("android", is_web=True) == PlataformaSO.WEB
+
+    contacto = Contacto(
+        nombre="Ana López",
+        telefono="+52 993 123 4567",
+        correo="ana@ejemplo.com",
+    )
+    assert contacto.puede_enviar_correo() is True
+    assert contacto.puede_llamar(PlataformaSO.WEB) is False
+    assert contacto.generar_uri_llamada(PlataformaSO.WEB) is None

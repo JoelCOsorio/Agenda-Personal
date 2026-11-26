@@ -13,25 +13,33 @@
 
 ## 1. Introducción
 
-El desarrollo de aplicaciones multiplataforma representa actualmente uno de los retos más relevantes dentro de la ingeniería de software, pues exige diseñar sistemas capaces de operar con una sola base de código en ecosistemas distintos —tanto de escritorio como móviles— sin sacrificar estabilidad, experiencia de usuario ni integración con las capacidades nativas de cada sistema operativo. En el marco de la asignatura **Desarrollo de Aplicaciones Multiplataforma**, el verdadero desafío no consiste únicamente en dibujar una interfaz que se adapte a distintos tamaños de pantalla, sino en resolver las diferencias estructurales entre plataformas como **Android**, **Windows** y **Linux**: permisos en tiempo de ejecución, ejecución en segundo plano, políticas de ahorro de energía, protocolos de notificación del sistema y disponibilidad de funciones propias del dispositivo como la telefonía.
+El desarrollo de aplicaciones multiplataforma representa actualmente uno de los retos más relevantes dentro de la ingeniería de software, pues exige diseñar sistemas capaces de operar con una sola base de código en ecosistemas distintos —escritorio, dispositivos móviles y navegadores web— sin sacrificar estabilidad, experiencia de usuario ni integración con las capacidades de cada entorno. En el marco de la asignatura **Desarrollo de Aplicaciones Multiplataforma**, el verdadero desafío no consiste únicamente en dibujar una interfaz que se adapte a distintos tamaños de pantalla, sino en resolver las diferencias estructurales entre plataformas como **Android**, **Windows**, **Linux** y **Web**: permisos en tiempo de ejecución, ejecución en segundo plano, políticas de ahorro de energía, protocolos de notificación del sistema (y la API de notificaciones del navegador), restricciones de almacenamiento en WebAssembly y disponibilidad de funciones propias del dispositivo como la telefonía.
 
 De forma paralela, en el ámbito personal y académico resulta frecuente dispersar clases, entregas, recordatorios y datos de contacto en herramientas separadas que dependen de cuentas en la nube o presentan comportamientos irregulares al sincronizar alertas entre la computadora y el teléfono. Frente a esta necesidad, el presente proyecto documenta el diseño, implementación y empaquetado de **Atempo**, una aplicación multiplataforma de gestión personal y académica desarrollada en **Python** con **Flet** (sobre el motor gráfico de Flutter) y almacenamiento local en **SQLite 3**.
 
-La aplicación integra en un solo entorno los módulos de **Agenda**, **Tareas**, **Contactos**, **Categorías/Subcategorías** y **Ajustes**, articulados alrededor de un **Motor Unificado de Notificaciones** que interactúa con las APIs nativas de Android, Windows y Linux. Su arquitectura desacoplada permite mantener la lógica de negocio y la persistencia completamente aisladas de la interfaz y de los adaptadores de plataforma, demostrando de manera práctica los principios, patrones y herramientas abordados a lo largo de la asignatura.
+La aplicación integra en un solo entorno los módulos de **Agenda**, **Tareas**, **Contactos**, **Categorías/Subcategorías** y **Ajustes**, articulados alrededor de un **Motor Unificado de Notificaciones** que interactúa con las APIs nativas de Android, Windows, Linux y la Web Notification API en navegador. Su arquitectura desacoplada permite mantener la lógica de negocio y la persistencia completamente aisladas de la interfaz y de los adaptadores de plataforma, demostrando de manera práctica los principios, patrones y herramientas abordados a lo largo de la asignatura.
 
 ---
 
-## 2. Objetivos
+## 2. Objetivos y Justificación
 
 ### 2.1 Objetivo General
-Desarrollar, probar y empaquetar una aplicación multiplataforma (Android, Windows y Linux) de agenda personal y académica con Python y Flet que integre la gestión de eventos, tareas y contactos con un sistema confiable de notificaciones locales nativas y almacenamiento autónomo en SQLite.
+Desarrollar, probar y empaquetar una aplicación multiplataforma (**Android**, **Windows**, **Linux** y **Web**) de agenda personal y académica con Python y Flet que integre la gestión de eventos, tareas y contactos con un sistema confiable de notificaciones locales y almacenamiento estructurado en SQLite.
 
 ### 2.2 Objetivos Específicos
-1. Aplicar los fundamentos de la asignatura Desarrollo de Aplicaciones Multiplataforma mediante una arquitectura desacoplada en capas (Puertos y Adaptadores y principios SOLID) que aísle la lógica de negocio de la interfaz gráfica y de las APIs particulares de Android, Windows y Linux.
-2. Implementar un motor unificado de notificaciones locales capaz de atender eventos y tareas con rangos de antelación configurables de hasta 7 días, detección de alertas perdidas tras apagados, avance automático de recurrencias y degradación controlada de acciones rápidas según el sistema operativo.
-3. Implementar la persistencia local en **SQLite 3** (modo WAL y claves foráneas estrictas) empleando identificadores `UUIDv4` y marcas temporales en UTC para garantizar autonomía sin conexión y facilitar una futura sincronización entre dispositivos.
-4. Diseñar una interfaz gráfica responsiva basada en Material Design 3 con navegación adaptable (`NavigationRail` en escritorio y `NavigationBar` en Android), cuatro vistas de calendario (día, semana, mes y año) y conmutación en vivo entre modo claro y modo oscuro.
-5. Automatizar la ejecución de pruebas unitarias e integración y la compilación de binarios nativos para Android (`.apk`), Linux y Windows mediante flujos de trabajo en GitHub Actions.
+1. Aplicar los fundamentos de la asignatura Desarrollo de Aplicaciones Multiplataforma mediante una arquitectura desacoplada en capas (Puertos y Adaptadores y principios SOLID) que aísle la lógica de negocio de la interfaz gráfica y de las APIs particulares de Android, Windows, Linux y Web.
+2. Implementar un motor unificado de notificaciones locales capaz de atender eventos y tareas con rangos de antelación configurables de hasta 7 días, detección de alertas perdidas tras apagados, avance automático de recurrencias y degradación controlada de acciones rápidas según el entorno de ejecución.
+3. Implementar la persistencia estructurada en **SQLite 3** (modo WAL en nativo/servidor y modo compatible en memoria para compilación WebAssembly/Pyodide, con claves foráneas estrictas) empleando identificadores `UUIDv4` y marcas temporales en UTC para garantizar autonomía sin conexión y facilitar una futura sincronización entre dispositivos.
+4. Diseñar una interfaz gráfica responsiva basada en Material Design 3 con navegación adaptable (`NavigationRail` en escritorio/web amplio y `NavigationBar` en pantallas móviles), cuatro vistas de calendario (día, semana, mes y año) y conmutación en vivo entre modo claro y modo oscuro.
+5. Automatizar la ejecución de pruebas unitarias e integración y la compilación de artefactos distribuibles para **Android (`.apk`)**, **Linux**, **Windows** y **Web** mediante flujos de trabajo en GitHub Actions.
+
+### 2.3 Justificación
+
+La organización diaria de estudiantes y profesionales suele fragmentarse entre múltiples herramientas independientes —un calendario para clases o reuniones, una aplicación distinta para listas de pendientes y otra libreta para contactos— lo cual provoca pérdida de contexto, olvidos por recordatorios inconsistentes y dependencia obligatoria de cuentas comerciales en la nube. Contar con una solución unificada, ligera y de funcionamiento local resuelve directamente este problema al centralizar eventos, tareas y contactos bajo reglas coherentes de horario, clasificación jerárquica y alertas controladas por el propio usuario.
+
+Desde la perspectiva académica de la asignatura **Desarrollo de Aplicaciones Multiplataforma**, el proyecto se justifica porque aborda de manera integral las problemáticas reales que diferencian a una aplicación multiplataforma robusta de un prototipo básico: la adaptación responsiva entre formatos de pantalla, la gestión de capacidades desiguales entre sistemas operativos (alarmas exactas en Android, *Windows Toast*, D-Bus en Linux y Web Notification API en navegador), el control condicional de acciones del dispositivo (`mailto:` multiplataforma frente a `tel:` exclusivo de Android) y la generación automatizada de paquetes para los cuatro destinos objetivo.
+
+Finalmente, la incorporación de una **versión Web** complementa las compilaciones nativas al ofrecer acceso inmediato desde cualquier navegador moderno sin proceso de instalación previa, ya sea en modo servidor web (`flet run --web`) o como aplicación estática ejecutable en el navegador mediante WebAssembly y Pyodide (`flet build web`). En conjunto, **Atempo** demuestra que una sola base de código bien diseñada en Python y Flet puede cubrir eficazmente escenarios móviles, de escritorio y web manteniendo calidad de ingeniería, privacidad de datos y mantenibilidad a largo plazo.
 
 ---
 
@@ -52,7 +60,7 @@ Desarrollar, probar y empaquetar una aplicación multiplataforma (Android, Windo
 
 ### 3.2 Requerimientos No Funcionales
 
-1. **Portabilidad multiplataforma:** La aplicación opera nativamente en escritorio (**Linux** y **Windows**) y dispositivos móviles (**Android**) desde una sola base de código en Python y Flet, con compilación nativa mediante `flet build` y adaptación automática de capacidades por sistema operativo.
+1. **Portabilidad multiplataforma:** La aplicación opera en escritorio (**Linux** y **Windows**), dispositivos móviles (**Android**) y navegador (**Web**, tanto en modo servidor `flet run --web` como paquete estático WASM/Pyodide con `flet build web`) desde una sola base de código en Python y Flet, con adaptación automática de capacidades por entorno.
 2. **Persistencia local y autonomía:** Toda la información reside localmente en el archivo `agenda_personal.db` bajo SQLite 3 con `PRAGMA foreign_keys = ON` y modo `WAL`, operando al 100% sin conexión a internet y sin envío de telemetría.
 3. **Modularidad y mantenibilidad:** Código organizado en cuatro capas desacopladas (`domain`, `application`, `infrastructure`, `presentation`) con inversión de dependencias mediante `Protocol`, claves `UUIDv4` y marcas UTC preparadas para una futura capa de sincronización.
 4. **Confiabilidad y degradación elegante:** SQLite actúa como fuente única de verdad frente a reinicios o revocación de permisos; si un entorno de escritorio Linux no soporta botones D-Bus o si Android revoca alarmas exactas, el sistema degrada sin fallos críticos.
@@ -64,7 +72,7 @@ Desarrollar, probar y empaquetar una aplicación multiplataforma (Android, Windo
 2. **Límite de recordatorio:** Cada evento o tarea admite máximo un recordatorio activo con antelación de `0` a `10,080` minutos (7 días) y fecha de disparo futura.
 3. **Ciclo de vida en tareas:** Marcar una tarea como completada cancela su notificación pendiente; reactivarla o reprogramar su fecha límite restablece el recordatorio si sigue vigente.
 4. **Integridad sin borrado en cascada:** Eliminar un contacto, subcategoría o categoría nunca borra los eventos ni tareas asociados; únicamente desvincula las referencias o reasigna la clasificación a `NULL`.
-5. **Discriminación por plataforma en contactos:** La acción `tel:` se habilita únicamente en Android y se oculta y bloquea en Linux y Windows.
+5. **Discriminación por plataforma en contactos:** La acción `tel:` se habilita únicamente en Android y se oculta y bloquea en Linux, Windows y Web.
 
 ---
 
@@ -75,11 +83,11 @@ El proyecto hace uso de herramientas modernas orientadas a portabilidad, reprodu
 | Componente | Tecnología | Función en el proyecto |
 | :--- | :--- | :--- |
 | **Lenguaje principal** | Python 3.14 (`>= 3.10`) | Lógica de dominio, servicios de aplicación, tipado estático y orquestación asíncrona. |
-| **Framework de UI** | Flet 1.1.3 (Flutter) | Construcción de interfaces reactivas Material Design 3 para Android, Linux y Windows desde una sola base de código. |
-| **Notificaciones nativas** | `flet-notifications 1.1.3` y `desktop-notifier 6.2.0` | Programación y entrega nativa en Android (`AlarmManager`) y Windows (*Toast*); planificador `asyncio` y worker residente D-Bus en Linux. |
-| **Gestor de base de datos** | SQLite 3 (modo WAL) | Persistencia local autónoma con claves `UUIDv4`, integridad referencial estricta, índices y triggers de validación. |
+| **Framework de UI** | Flet 1.1.3 (Flutter) | Construcción de interfaces reactivas Material Design 3 para Android, Linux, Windows y Web desde una sola base de código. |
+| **Notificaciones nativas** | `flet-notifications 1.1.3` y `desktop-notifier 6.2.0` | Programación y entrega nativa en Android (`AlarmManager`) y Windows (*Toast*); planificador `asyncio` y worker residente D-Bus en Linux; planificador `asyncio` y Web Notification API en navegador. |
+| **Gestor de base de datos** | SQLite 3 (modo WAL / compatible WASM) | Persistencia local autónoma con claves `UUIDv4`, integridad referencial estricta, índices y triggers de validación; con modo de journal compatible en compilación estática Pyodide/WebAssembly. |
 | **Gestor de dependencias** | `uv` (`pyproject.toml` / `uv.lock`) | Administración reproducible de entornos virtuales y bloqueo exacto de versiones de paquetes. |
-| **Empaquetado y CI/CD** | `flet-cli` (`flet build`) y GitHub Actions (`flet-dev/flet-build-action@v1`) | Ejecución continua de pruebas y compilación en la nube de ejecutables para Linux, Windows y APK para Android. |
+| **Empaquetado y CI/CD** | `flet-cli` (`flet build`) y GitHub Actions (`flet-dev/flet-build-action@v1`) | Ejecución continua de pruebas y compilación en la nube de ejecutables para Linux, Windows, APK para Android y sitio estático Web. |
 | **Pruebas automatizadas** | `pytest 9.2` y `pytest-asyncio 1.5` | Verificación unitaria de reglas de negocio, pruebas de contrato multiplataforma e integración real con SQLite. |
 | **Control de versiones** | Git y GitHub | Versionado mediante ramas dedicadas por módulo, commits semánticos, integraciones `--no-ff` y publicación de Releases. |
 
@@ -99,7 +107,7 @@ El código está estructurado siguiendo la arquitectura de **Puertos y Adaptador
 | `src/agenda_app/application/ports/` | Interfaces `Protocol` segregadas para repositorios, reloj, lanzador de URIs externos y adaptador de notificaciones. |
 | `src/agenda_app/application/services/` | Casos de uso (`ServicioEventos`, `ServicioTareas`, `ServicioContactos`, `ServicioCategorias`, `ServicioAjustes`, `MotorNotificaciones` y `StartupReconciler`). |
 | `src/agenda_app/infrastructure/persistence/sqlite/` | Conexión SQLite en modo WAL, migraciones versionadas (`001_initial.sql`) y los seis repositorios concretos. |
-| `src/agenda_app/infrastructure/notifications/` | Adaptadores nativos para Android, Windows y Linux, fábrica por plataforma y servicio residente `linux_worker.py` para `systemd --user`. |
+| `src/agenda_app/infrastructure/notifications/` | Adaptadores nativos para Android, Windows, Linux y Web (`adaptador_web.py`), fábrica por plataforma y servicio residente `linux_worker.py` para `systemd --user`. |
 | `src/agenda_app/infrastructure/platform/` | Detector de plataforma y lanzador externo condicionado por SO (`mailto:` multiplataforma y `tel:` exclusivo de Android). |
 | `src/agenda_app/presentation/` | Tema Material 3 (claro/oscuro), formateadores `UTC <-> Local`, shell responsivo (`NavigationBar`/`NavigationRail`), vistas de Agenda (Día, Semana, Mes, Año), Tareas, Contactos, Ajustes y diálogos modales. |
 | `src/assets/icon.svg` | Ícono vectorial minimalista personalizado de **Atempo** usado por `flet build` para generar los íconos de cada plataforma. |
@@ -126,7 +134,7 @@ flowchart TD
     end
     subgraph Infra ["Capa de Infraestructura"]
         SQL["SQLiteDatabase WAL + Migraciones + 6 Repositorios"]
-        NOTIF["Adaptadores Android, Windows, Linux + Worker D-Bus"]
+        NOTIF["Adaptadores Android, Windows, Linux, Web + Worker D-Bus"]
         PLAT["Detector de SO + Lanzador mailto:/tel:"]
     end
 
@@ -163,7 +171,7 @@ package "1. Capa de Dominio (Python Puro)" as Dom {
 
 package "3. Capa de Infraestructura" as Infra {
   [SQLiteDatabase WAL + 6 Repositorios] as Sqlite
-  [Adaptadores SO\nAndroid / Windows / Linux + Worker D-Bus] as NotifSO
+  [Adaptadores SO\nAndroid / Windows / Linux / Web + Worker D-Bus] as NotifSO
   [Detector SO + Lanzador mailto:/tel:] as Plat
 }
 
@@ -667,6 +675,7 @@ Dado que `flet-notifications` presenta capacidades distintas en cada plataforma,
 * **Android:** emplea `schedule()` con `EXACT_ALLOW_WHILE_IDLE` (degradando automáticamente a `INEXACT_ALLOW_WHILE_IDLE` si el permiso exacto no está concedido), declara `ScheduledNotificationBootReceiver` en `pyproject.toml` para sobrevivir reinicios y configura el botón *Posponer* con `foreground=True` para que el intérprete Python reprograme la nueva alerta.
 * **Windows:** programa notificaciones únicas (*one-off*) y realiza cancelaciones individuales por `id_notificacion_so` (`int32`), ya que la API de Windows no admite cancelación masiva de pendientes ni recurrencias nativas.
 * **Linux:** al no existir programación diferida en FreeDesktop D-Bus, utiliza un planificador asíncrono `asyncio` mientras la aplicación está abierta y ofrece un proceso ligero opcional (`linux_worker.py`) registrable en `systemd --user` que lee el mismo archivo SQLite en modo WAL y emite notificaciones con botones vía `desktop-notifier`.
+* **Web (navegador):** detecta `page.web` / `sys.platform == "emscripten"` como `PlataformaSO.WEB`, emplea `AdaptadorNotificacionesWeb` con planificador `asyncio` en la pestaña activa y emite alertas mediante la *Web Notification API* (`ftn.WebOptions`) con degradación controlada sin acciones rápidas. La aplicación puede ejecutarse tanto como servidor web dinámico (`uv run flet run --web src/main.py`, conservando persistencia SQLite en disco del servidor) como paquete estático autónomo en el navegador (`flet build web` con Pyodide/WebAssembly, usando estrategia de rutas `hash` en `[tool.flet.web]` y journal SQLite en memoria compatible con Emscripten).
 
 #### Máquina de Estados del Recordatorio — Sintaxis Mermaid
 
@@ -747,7 +756,7 @@ En esta sección se documentan las evidencias del entorno de desarrollo, la gest
 > **Captura 5 — Integración Continua (`ci.yml`) en GitHub Actions:** *Vista de GitHub Actions mostrando la ejecución exitosa del workflow `CI - Pruebas Automatizadas` en paralelo sobre `ubuntu-latest` y `windows-latest`.*  
 > *(Insertar captura aquí)*
 
-> **Captura 6 — Compilación multiplataforma en la nube (`build.yml`):** *Resumen del workflow `Build Multiplataforma (Android, Linux, Windows)` en GitHub Actions mostrando en verde la verificación de pruebas y la compilación simultánea de `apk`, `linux` y `windows` con sus artefactos generados.*  
+> **Captura 6 — Compilación multiplataforma en la nube (`build.yml`):** *Resumen del workflow `Build Multiplataforma (Android, Linux, Windows, Web)` en GitHub Actions mostrando en verde la verificación de pruebas y la compilación simultánea de `apk`, `linux`, `windows` y `web` con sus artefactos generados.*  
 > *(Insertar captura aquí)*
 
 > **Captura 7 — Publicación de Release en GitHub:** *Sección de Releases del repositorio mostrando la etiqueta de versión (`v1.0.0`) con los paquetes compilados adjuntos listos para descargar.*  
@@ -759,9 +768,9 @@ En esta sección se documentan las evidencias del entorno de desarrollo, la gest
 
 ### 7.1 Suite de Pruebas Automatizadas
 
-Para asegurar el cumplimiento de las reglas de negocio antes de empaquetar, se construyó una suite de **29 pruebas automatizadas** que cubren dominio puro (incluyendo regresión para eventos cercanos con antelación cero, cruce de medianoche, normalización de `DatePicker` y vista previa de recordatorios), motor de notificaciones, contratos de los adaptadores de Android/Windows/Linux, integración real con SQLite WAL y navegación de vistas UI. Todas se ejecutan con `uv run pytest tests/unit tests/integration -v` (29 pruebas superadas en 0.60 s, 0 advertencias).
+Para asegurar el cumplimiento de las reglas de negocio antes de empaquetar, se construyó una suite de **31 pruebas automatizadas** que cubren dominio puro (incluyendo regresión para eventos cercanos con antelación cero, cruce de medianoche, normalización de `DatePicker` y vista previa de recordatorios), motor de notificaciones, contratos de los adaptadores de Android, Windows, Linux y Web, integración real con SQLite WAL y navegación de vistas UI. Todas se ejecutan con `uv run pytest tests/unit tests/integration -v` (31 pruebas superadas, 0 advertencias).
 
-> **Captura 8 — Ejecución de pruebas automatizadas:** *Terminal mostrando la salida completa de `uv run pytest tests/unit tests/integration -v` con los 29 casos superados.*  
+> **Captura 8 — Ejecución de pruebas automatizadas:** *Terminal mostrando la salida completa de `uv run pytest tests/unit tests/integration -v` con los 31 casos superados.*  
 > *(Insertar captura aquí)*
 
 ### 7.2 Ejecución y Demostración de Funcionalidades en Linux (KDE Plasma)
@@ -815,15 +824,25 @@ Para asegurar el cumplimiento de las reglas de negocio antes de empaquetar, se c
 > **Captura 23 — Notificación nativa en Windows (*Windows Toast*):** *Alerta programada apareciendo en el centro de notificaciones de Windows con sus botones de acción.*  
 > *(Insertar captura aquí)*
 
+### 7.5 Ejecución y Demostración en Versión Web
+
+Además de las compilaciones nativas, **Atempo** dispone de una versión Web ejecutable localmente con `uv run flet run --web src/main.py` o compilable como aplicación estática WebAssembly/Pyodide mediante `flet build web` (incluida en el pipeline de GitHub Actions como artefacto `atempo-web` y verificable con `uv run flet serve`).
+
+> **Captura 24 — Ejecución de Atempo en navegador Web:** *Interfaz completa de Atempo abierta en navegador web moderno (Chrome/Firefox) mostrando el calendario responsivo, la navegación adaptable y el diagnóstico de plataforma reportando `Sistema detectado: WEB`.*  
+> *(Insertar captura aquí)*
+
+> **Captura 25 — Compilación estática Web y notificación en navegador:** *Ejecución del paquete estático (`build/web`) servido mediante `flet serve` (o despliegue web) junto con una alerta emitida a través de la Web Notification API y la verificación de que los contactos habilitan `mailto:` y ocultan `tel:` en navegador.*  
+> *(Insertar captura aquí)*
+
 ---
 
 ## 8. Conclusiones
 
-El desarrollo de **Atempo** dentro de la asignatura **Desarrollo de Aplicaciones Multiplataforma** permitió comprobar en la práctica que construir software verdaderamente multiplataforma implica mucho más que compartir una interfaz gráfica entre distintos sistemas operativos. Si bien Python y Flet facilitan mantener una sola base de código visual basada en Material Design 3 con adaptación responsiva para móvil y escritorio, la integración con servicios nativos del sistema operativo —especialmente el agendado de notificaciones en segundo plano, la gestión de permisos en Android, las restricciones de Windows Toast y el protocolo D-Bus en Linux— obliga a diseñar abstracciones claras desde el inicio.
+El desarrollo de **Atempo** dentro de la asignatura **Desarrollo de Aplicaciones Multiplataforma** permitió comprobar en la práctica que construir software verdaderamente multiplataforma implica mucho más que compartir una interfaz gráfica entre distintos sistemas operativos. Si bien Python y Flet facilitan mantener una sola base de código visual basada en Material Design 3 con adaptación responsiva para móvil, escritorio y navegador web, la integración con servicios propios de cada entorno —especialmente el agendado de notificaciones en segundo plano, la gestión de permisos en Android, las restricciones de Windows Toast, el protocolo D-Bus en Linux y las particularidades de la Web Notification API y WebAssembly en navegador— obliga a diseñar abstracciones claras desde el inicio.
 
-La adopción de una arquitectura en capas basada en Puertos y Adaptadores y principios SOLID resultó decisiva para controlar esta complejidad. Mantener el dominio completamente libre de dependencias externas permitió validar las reglas críticas del negocio (anti-solapamiento, recurrencias, límites temporales de recordatorios, ciclo de vida de tareas y desvinculación sin cascada) mediante 29 pruebas automatizadas rápidas, además de verificar mediante pruebas de contrato el comportamiento esperado de Android y Windows aun desarrollando principalmente desde Linux.
+La adopción de una arquitectura en capas basada en Puertos y Adaptadores y principios SOLID resultó decisiva para controlar esta complejidad. Mantener el dominio completamente libre de dependencias externas permitió validar las reglas críticas del negocio (anti-solapamiento, recurrencias, límites temporales de recordatorios, ciclo de vida de tareas y desvinculación sin cascada) mediante 31 pruebas automatizadas rápidas, además de verificar mediante pruebas de contrato el comportamiento esperado de Android, Windows, Linux y Web —incluso incorporando la plataforma Web añadiendo únicamente un nuevo adaptador sin alterar la lógica de negocio existente—.
 
-Asimismo, el uso de SQLite 3 en modo WAL como fuente única de verdad garantizó autonomía sin conexión, privacidad de los datos y concurrencia segura con el servicio residente de Linux, dejando preparados identificadores `UUIDv4` y marcas temporales UTC para incorporar sincronización entre dispositivos en una versión futura. Finalmente, la integración de `uv`, Git con ramas dedicadas y flujos de compilación en la nube con GitHub Actions completó el ciclo de vida profesional del software, desde la especificación de requerimientos hasta la generación automatizada de ejecutables para las tres plataformas objetivo.
+Asimismo, el uso de SQLite 3 en modo WAL (con respaldo automático compatible para WebAssembly/Pyodide) garantizó autonomía sin conexión, privacidad de los datos y concurrencia segura con el servicio residente de Linux, dejando preparados identificadores `UUIDv4` y marcas temporales UTC para incorporar sincronización entre dispositivos en una versión futura. Finalmente, la integración de `uv`, Git con ramas dedicadas y flujos de compilación en la nube con GitHub Actions completó el ciclo de vida profesional del software, desde la especificación de requerimientos hasta la generación automatizada de paquetes para las cuatro plataformas objetivo (**Android, Linux, Windows y Web**).
 
 ---
 

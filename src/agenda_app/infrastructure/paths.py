@@ -17,6 +17,8 @@ def obtener_directorio_datos() -> Path:
     flet_storage = os.environ.get("FLET_APP_STORAGE_DATA")
     if flet_storage:
         ruta = Path(flet_storage)
+    elif sys.platform == "emscripten":
+        ruta = Path("/tmp") / APP_DIR_LINUX
     elif sys.platform.startswith("win"):
         base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
         ruta = base / APP_DIR_WINDOWS

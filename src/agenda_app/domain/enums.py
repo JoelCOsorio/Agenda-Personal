@@ -40,6 +40,7 @@ class PlataformaSO(str, Enum):
     ANDROID = "ANDROID"
     WINDOWS = "WINDOWS"
     LINUX = "LINUX"
+    WEB = "WEB"
 
 
 class VistaAgenda(str, Enum):
