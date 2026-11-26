@@ -1,6 +1,6 @@
 [project]
 name = "agenda-personal"
-version = "1.0.0"
+version = "1.0.2"
 description = "Aplicación multiplataforma de Agenda Personal y Académica con notificaciones nativas (Android, Windows y Linux)."
 readme = "README.md"
 requires-python = ">=3.10"
