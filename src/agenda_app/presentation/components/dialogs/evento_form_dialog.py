@@ -21,7 +21,10 @@ from agenda_app.presentation.components.dialogs.categoria_dialog import (
 )
 from agenda_app.presentation.formatters import (
     OPCIONES_ANTELACION_MIN,
+    calcular_inicio_por_defecto,
     combinar_local_a_utc,
+    evaluar_preview_recordatorio,
+    fecha_desde_datepicker,
     formatear_fecha,
     formatear_fecha_hora,
     utc_a_local,
@@ -51,10 +54,7 @@ def abrir_formulario_evento(
             TipoOrigenRecordatorio.EVENTO, evento_editar.id
         )
     else:
-        dia_base = fecha_inicial or ahora_local.date()
-        hora_sig = (ahora_local + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
-        ini_loc = datetime.combine(dia_base, hora_sig.time())
-        fin_loc = ini_loc + timedelta(hours=1)
+        ini_loc, fin_loc = calcular_inicio_por_defecto(fecha_inicial, ahora_local)
         rec_existente = None
 
     estado = {
@@ -130,17 +130,18 @@ def abrir_formulario_evento(
     def _pick_fecha(campo: str, btn: ft.OutlinedButton, prefijo: str) -> None:
         def _on_change(e: ft.Event[ft.DatePicker]) -> None:
             if e.control.value:
-                estado[campo] = e.control.value.date()
+                estado[campo] = fecha_desde_datepicker(e.control.value)
                 if campo == "fecha_inicio" and estado["fecha_fin"] < estado["fecha_inicio"]:
                     estado["fecha_fin"] = estado["fecha_inicio"]
                     btn_fecha_fin.content = f"Fin: {formatear_fecha(estado['fecha_fin'])}"
                 btn.content = f"{prefijo}: {formatear_fecha(estado[campo])}"
+                _actualizar_preview_recordatorio()
                 page.update()
 
         picker = ft.DatePicker(
             first_date=datetime(2020, 1, 1),
             last_date=datetime(2035, 12, 31),
-            current_date=datetime.combine(estado[campo], time(0, 0)),
+            value=datetime.combine(estado[campo], time(12, 0)),
             on_change=_on_change,
         )
         page.show_dialog(picker)
@@ -150,6 +151,7 @@ def abrir_formulario_evento(
             if e.control.value:
                 estado[campo] = e.control.value.replace(second=0, microsecond=0)
                 btn.content = f"Hora: {_fmt_hora(estado[campo])}"
+                _actualizar_preview_recordatorio()
                 page.update()
 
         picker = ft.TimePicker(
@@ -171,6 +173,11 @@ def abrir_formulario_evento(
         btn_hora_ini.visible = not es_todo
         con_hora_fin_sw.visible = not es_todo
         fila_fin.visible = (not es_todo) and bool(con_hora_fin_sw.value)
+        # Si es Todo el día para hoy (00:00 ya pasó), evitar bloquear al usuario con el default
+        if es_todo and estado["fecha_inicio"] <= ahora_local.date() and rec_dd.value:
+            rec_dd.value = ""
+            rec_custom_field.visible = False
+        _actualizar_preview_recordatorio()
         page.update()
 
     todo_el_dia_sw.on_change = _actualizar_visibilidad_horarios
@@ -315,10 +322,40 @@ def abrir_formulario_evento(
         value=str(antelacion_inicial or 15),
         visible=valor_dd_rec == "CUSTOM",
     )
+    preview_rec_txt = ft.Text("", size=12)
+
+    def _leer_antelacion_actual() -> int | None:
+        if rec_dd.value == "":
+            return None
+        if rec_dd.value == "CUSTOM":
+            try:
+                return int(rec_custom_field.value or "0")
+            except ValueError:
+                return -1
+        return int(rec_dd.value) if rec_dd.value else None
+
+    def _actualizar_preview_recordatorio() -> None:
+        es_todo = bool(todo_el_dia_sw.value)
+        objetivo_utc = combinar_local_a_utc(
+            estado["fecha_inicio"],
+            time(0, 0) if es_todo else estado["hora_inicio"],
+        )
+        ok, msg = evaluar_preview_recordatorio(
+            objetivo_utc=objetivo_utc,
+            antelacion_minutos=_leer_antelacion_actual(),
+            ahora_utc=contenedor.reloj.ahora_utc(),
+            formato_24h=ajustes.formato_24h,
+        )
+        preview_rec_txt.value = msg
+        preview_rec_txt.color = ft.Colors.PRIMARY if ok else ft.Colors.ERROR
+
     rec_dd.on_select = lambda _: (
         setattr(rec_custom_field, "visible", rec_dd.value == "CUSTOM"),
+        _actualizar_preview_recordatorio(),
         page.update(),
     )
+    rec_custom_field.on_change = lambda _: (_actualizar_preview_recordatorio(), page.update())
+    _actualizar_preview_recordatorio()
 
     # Contactos vinculados (RF-18)
     todos_contactos = contenedor.servicio_contactos.buscar()
@@ -466,6 +503,7 @@ def abrir_formulario_evento(
                     chips_dias,
                     rec_dd,
                     rec_custom_field,
+                    preview_rec_txt,
                     ft.Text("Contactos vinculados:", size=12, weight=ft.FontWeight.W_600),
                     chips_contactos
                     if todos_contactos

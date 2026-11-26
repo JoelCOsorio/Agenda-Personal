@@ -713,6 +713,15 @@ ATENDIDO --> [*]
 @enduml
 ```
 
+### 5.6 Refinamiento en la Programación y Validación de Recordatorios
+
+Durante las pruebas funcionales en uso real se identificaron cuatro situaciones que dificultaban la programación de recordatorios para eventos próximos o creados en horario nocturno, las cuales fueron corregidas de forma integral en el dominio y la capa de presentación:
+
+1. **Cruce de medianoche en formularios de eventos:** al crear un evento nuevo entre las `23:00` y `23:59`, el cálculo inicial redondeaba la hora sugerida a `00:00`, pero la combinaba con la fecha del día actual en lugar de avanzar al día siguiente, generando un horario en el pasado que impedía programar incluso alertas con antelación *"Al momento de iniciar"*. Se encapsuló el cálculo en la función pura `calcular_inicio_por_defecto`, garantizando la transición correcta al día siguiente (`00:00`–`01:00`).
+2. **Normalización del selector de fecha (`DatePicker`) y eventos de todo el día:** se reemplazó el manejo directo del atributo de fecha por `fecha_desde_datepicker` con valor inicial al mediodía local, previniendo desfases de un día en zonas horarias con desplazamiento negativo respecto a UTC (como `UTC-6`). Asimismo, al activar el interruptor *"Todo el día"* sobre la fecha actual (cuyo inicio a las `00:00` ya transcurrió), el formulario desactiva automáticamente el recordatorio por defecto para evitar bloqueos innecesarios al guardar.
+3. **Ajuste del margen de seguridad temporal:** en `ValidadorRecordatorio` se redujo `MARGEN_SEGURIDAD_SEGUNDOS` de `5` a `1` segundo, permitiendo definir recordatorios inmediatos con antelación cero (*"Al momento de iniciar"*) para actividades próximas sin comprometer la precisión a nivel de segundo de las APIs nativas de notificación.
+4. **Vista previa en tiempo real y retroalimentación clara:** tanto el formulario de eventos como el de tareas incorporan `evaluar_preview_recordatorio`, que muestra dinámicamente antes de guardar la fecha y hora exacta en que sonará el aviso (*"Sonará el: ..."*) o una advertencia preventiva clara cuando la antelación seleccionada cae en el pasado, indicando reducir la antelación o ajustar el horario.
+
 ---
 
 ## 6. Evidencias de Desarrollo y Compilación
@@ -750,9 +759,9 @@ En esta sección se documentan las evidencias del entorno de desarrollo, la gest
 
 ### 7.1 Suite de Pruebas Automatizadas
 
-Para asegurar el cumplimiento de las reglas de negocio antes de empaquetar, se construyó una suite de **25 pruebas automatizadas** que cubren dominio puro, motor de notificaciones, contratos de los adaptadores de Android/Windows/Linux, integración real con SQLite WAL y navegación de vistas UI. Todas se ejecutan con `uv run pytest tests/unit tests/integration -v` (25 pruebas superadas en 0.86 s, 0 advertencias).
+Para asegurar el cumplimiento de las reglas de negocio antes de empaquetar, se construyó una suite de **29 pruebas automatizadas** que cubren dominio puro (incluyendo regresión para eventos cercanos con antelación cero, cruce de medianoche, normalización de `DatePicker` y vista previa de recordatorios), motor de notificaciones, contratos de los adaptadores de Android/Windows/Linux, integración real con SQLite WAL y navegación de vistas UI. Todas se ejecutan con `uv run pytest tests/unit tests/integration -v` (29 pruebas superadas en 0.60 s, 0 advertencias).
 
-> **Captura 8 — Ejecución de pruebas automatizadas:** *Terminal mostrando la salida completa de `uv run pytest tests/unit tests/integration -v` con los 25 casos superados.*  
+> **Captura 8 — Ejecución de pruebas automatizadas:** *Terminal mostrando la salida completa de `uv run pytest tests/unit tests/integration -v` con los 29 casos superados.*  
 > *(Insertar captura aquí)*
 
 ### 7.2 Ejecución y Demostración de Funcionalidades en Linux (KDE Plasma)
@@ -812,7 +821,7 @@ Para asegurar el cumplimiento de las reglas de negocio antes de empaquetar, se c
 
 El desarrollo de **Atempo** dentro de la asignatura **Desarrollo de Aplicaciones Multiplataforma** permitió comprobar en la práctica que construir software verdaderamente multiplataforma implica mucho más que compartir una interfaz gráfica entre distintos sistemas operativos. Si bien Python y Flet facilitan mantener una sola base de código visual basada en Material Design 3 con adaptación responsiva para móvil y escritorio, la integración con servicios nativos del sistema operativo —especialmente el agendado de notificaciones en segundo plano, la gestión de permisos en Android, las restricciones de Windows Toast y el protocolo D-Bus en Linux— obliga a diseñar abstracciones claras desde el inicio.
 
-La adopción de una arquitectura en capas basada en Puertos y Adaptadores y principios SOLID resultó decisiva para controlar esta complejidad. Mantener el dominio completamente libre de dependencias externas permitió validar las reglas críticas del negocio (anti-solapamiento, recurrencias, límites temporales de recordatorios, ciclo de vida de tareas y desvinculación sin cascada) mediante 25 pruebas automatizadas rápidas, además de verificar mediante pruebas de contrato el comportamiento esperado de Android y Windows aun desarrollando principalmente desde Linux.
+La adopción de una arquitectura en capas basada en Puertos y Adaptadores y principios SOLID resultó decisiva para controlar esta complejidad. Mantener el dominio completamente libre de dependencias externas permitió validar las reglas críticas del negocio (anti-solapamiento, recurrencias, límites temporales de recordatorios, ciclo de vida de tareas y desvinculación sin cascada) mediante 29 pruebas automatizadas rápidas, además de verificar mediante pruebas de contrato el comportamiento esperado de Android y Windows aun desarrollando principalmente desde Linux.
 
 Asimismo, el uso de SQLite 3 en modo WAL como fuente única de verdad garantizó autonomía sin conexión, privacidad de los datos y concurrencia segura con el servicio residente de Linux, dejando preparados identificadores `UUIDv4` y marcas temporales UTC para incorporar sincronización entre dispositivos en una versión futura. Finalmente, la integración de `uv`, Git con ramas dedicadas y flujos de compilación en la nube con GitHub Actions completó el ciclo de vida profesional del software, desde la especificación de requerimientos hasta la generación automatizada de ejecutables para las tres plataformas objetivo.
 

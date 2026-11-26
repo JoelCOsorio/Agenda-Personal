@@ -52,6 +52,38 @@ def test_validar_disparo_rechaza_antelacion_negativa_y_pasado() -> None:
         )
 
 
+def test_validar_disparo_permite_eventos_cercanos_al_iniciar() -> None:
+    # Con margen de 1 segundo, un evento en +2s o +1min con antelación 0 debe aceptarse
+    disparo_2s = ValidadorRecordatorio.calcular_y_validar_disparo(
+        fecha_objetivo=BASE_AHORA + timedelta(seconds=2),
+        antelacion_minutos=0,
+        ahora=BASE_AHORA,
+    )
+    assert disparo_2s == BASE_AHORA + timedelta(seconds=2)
+
+    disparo_1m = ValidadorRecordatorio.calcular_y_validar_disparo(
+        fecha_objetivo=BASE_AHORA + timedelta(minutes=1),
+        antelacion_minutos=0,
+        ahora=BASE_AHORA,
+    )
+    assert disparo_1m == BASE_AHORA + timedelta(minutes=1)
+
+    # En el mismo instante exacto o en el pasado debe rechazarse
+    with pytest.raises(RecordatorioInvalidoError, match="ya transcurrió"):
+        ValidadorRecordatorio.calcular_y_validar_disparo(
+            fecha_objetivo=BASE_AHORA,
+            antelacion_minutos=0,
+            ahora=BASE_AHORA,
+        )
+
+    with pytest.raises(RecordatorioInvalidoError, match="ya transcurrió"):
+        ValidadorRecordatorio.calcular_y_validar_disparo(
+            fecha_objetivo=BASE_AHORA - timedelta(seconds=1),
+            antelacion_minutos=0,
+            ahora=BASE_AHORA,
+        )
+
+
 def test_recordatorio_exige_arco_xor_e_id_so_int32() -> None:
     ev_id = uuid4()
     tar_id = uuid4()

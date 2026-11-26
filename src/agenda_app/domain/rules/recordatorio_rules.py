@@ -12,7 +12,7 @@ from agenda_app.domain.entities.recordatorio import MAX_ANTELACION_MINUTOS, Reco
 from agenda_app.domain.enums import TipoOrigenRecordatorio
 from agenda_app.domain.exceptions import RecordatorioInvalidoError
 
-MARGEN_SEGURIDAD_SEGUNDOS = 5
+MARGEN_SEGURIDAD_SEGUNDOS = 1
 
 
 @dataclass(frozen=True)
@@ -52,7 +52,8 @@ class ValidadorRecordatorio:
 
         if fecha_disparo < umbral_minimo:
             raise RecordatorioInvalidoError(
-                "La fecha y hora calculada para la notificación ya transcurrió o es demasiado próxima."
+                "La hora calculada para el recordatorio ya transcurrió. "
+                "Reduce la antelación (por ejemplo, 'Al momento de iniciar') o ajusta la fecha y hora."
             )
         return fecha_disparo
 

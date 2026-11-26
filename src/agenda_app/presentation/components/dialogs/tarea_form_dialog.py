@@ -23,6 +23,8 @@ from agenda_app.presentation.formatters import (
     OPCIONES_ANTELACION_MIN,
     combinar_local_a_utc,
     etiqueta_estado_tarea,
+    evaluar_preview_recordatorio,
+    fecha_desde_datepicker,
     formatear_fecha,
     utc_a_local,
 )
@@ -121,15 +123,16 @@ def abrir_formulario_tarea(
     def _pick_fecha(_: ft.Event) -> None:
         def _on_change(e: ft.Event[ft.DatePicker]) -> None:
             if e.control.value:
-                estado_form["fecha_lim"] = e.control.value.date()
+                estado_form["fecha_lim"] = fecha_desde_datepicker(e.control.value)
                 btn_fecha.content = f"Fecha: {formatear_fecha(estado_form['fecha_lim'])}"
+                _actualizar_preview_rec()
                 page.update()
 
         page.show_dialog(
             ft.DatePicker(
                 first_date=datetime(2020, 1, 1),
                 last_date=datetime(2035, 12, 31),
-                current_date=datetime.combine(estado_form["fecha_lim"], time(0, 0)),
+                value=datetime.combine(estado_form["fecha_lim"], time(12, 0)),
                 on_change=_on_change,
             )
         )
@@ -139,6 +142,7 @@ def abrir_formulario_tarea(
             if e.control.value:
                 estado_form["hora_lim"] = e.control.value.replace(second=0, microsecond=0)
                 btn_hora.content = f"Hora: {_fmt_hora(estado_form['hora_lim'])}"
+                _actualizar_preview_rec()
                 page.update()
 
         page.show_dialog(
@@ -239,19 +243,49 @@ def abrir_formulario_tarea(
         value=str(antelacion_ini or 15),
         visible=bool(con_fecha_sw.value) and val_dd_rec == "CUSTOM",
     )
+    preview_rec_txt = ft.Text("", size=12, visible=bool(con_fecha_sw.value))
+
+    def _leer_antelacion() -> int | None:
+        if not con_fecha_sw.value or rec_dd.value == "":
+            return None
+        if rec_dd.value == "CUSTOM":
+            try:
+                return int(rec_custom.value or "0")
+            except ValueError:
+                return -1
+        return int(rec_dd.value) if rec_dd.value else None
+
+    def _actualizar_preview_rec() -> None:
+        if not con_fecha_sw.value:
+            preview_rec_txt.visible = False
+            return
+        preview_rec_txt.visible = True
+        objetivo_utc = combinar_local_a_utc(estado_form["fecha_lim"], estado_form["hora_lim"])
+        ok, msg = evaluar_preview_recordatorio(
+            objetivo_utc=objetivo_utc,
+            antelacion_minutos=_leer_antelacion(),
+            ahora_utc=contenedor.reloj.ahora_utc(),
+            formato_24h=ajustes.formato_24h,
+        )
+        preview_rec_txt.value = msg
+        preview_rec_txt.color = ft.Colors.PRIMARY if ok else ft.Colors.ERROR
 
     def _toggle_fecha(_: ft.Event) -> None:
         activo = bool(con_fecha_sw.value)
         fila_fecha.visible = activo
         rec_dd.visible = activo
         rec_custom.visible = activo and rec_dd.value == "CUSTOM"
+        _actualizar_preview_rec()
         page.update()
 
     con_fecha_sw.on_change = _toggle_fecha
     rec_dd.on_select = lambda _: (
         setattr(rec_custom, "visible", bool(con_fecha_sw.value) and rec_dd.value == "CUSTOM"),
+        _actualizar_preview_rec(),
         page.update(),
     )
+    rec_custom.on_change = lambda _: (_actualizar_preview_rec(), page.update())
+    _actualizar_preview_rec()
 
     # Contactos vinculados
     todos_contactos = contenedor.servicio_contactos.buscar()
@@ -350,6 +384,7 @@ def abrir_formulario_tarea(
                     ft.Row(spacing=6, controls=[sub_dd, btn_add_sub]),
                     rec_dd,
                     rec_custom,
+                    preview_rec_txt,
                     ft.Text("Contactos vinculados:", size=12, weight=ft.FontWeight.W_600),
                     chips_contactos
                     if todos_contactos

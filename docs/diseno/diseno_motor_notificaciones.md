@@ -185,12 +185,17 @@ Cada vez que la aplicación inicia o regresa a primer plano (`AppLifecycleState.
 3. **Avance de recurrencias:** Para eventos recurrentes cuya última ocurrencia ya pasó, calcula la siguiente ocurrencia futura y crea/actualiza su recordatorio *one-off*.
 4. **Reconciliación con la cola nativa:** Compara los recordatorios futuros `PENDIENTE`/`POSPUESTO` dentro de la ventana activa contra el SO (especialmente importante en Android tras revocación/restauración de permisos o actualización de app) y reprograma los faltantes.
 
-### 6.4 Validación de Disponibilidad y Rango de 7 Días (`RN-03`)
+### 6.4 Validación de Disponibilidad, Margen de Seguridad y Rango de 7 Días (`RN-03`)
 Antes de aceptar un recordatorio desde la UI de Eventos o Tareas, el motor valida en orden:
 1. `0 <= antelacion_minutos <= 10080` (máximo 1 semana = 7 × 24 × 60 minutos).
 2. `fecha_disparo = fecha_objetivo - timedelta(minutes=antelacion_minutos)`.
-3. `fecha_disparo > ahora_utc + margen_seguridad` (ej. ≥ 5 segundos en el futuro, ya que las APIs nativas tienen precisión a nivel de segundo).
+3. `fecha_disparo >= ahora_utc + margen_seguridad` (margen de **1 segundo**, reducido desde el borrador inicial de 5 segundos tras pruebas en uso real para permitir programar alertas inmediatas con antelación *"Al momento de iniciar"* cuando el evento está próximo, manteniendo protección contra precisión de segundo de las APIs nativas).
 4. Capacidad/permisos de la plataforma actual (si no hay permisos concedidos, solicita permiso o informa al usuario antes de guardar como fallido).
+
+Complementariamente, la capa de presentación incorpora tres salvaguardas preventivas en los formularios de Eventos y Tareas:
+* **Cruce de medianoche:** Al sugerir la hora inicial de un evento nuevo entre las `23:00` y `23:59`, la fecha base avanza al día siguiente (`00:00`–`01:00`) evitando generar por defecto horarios en el pasado.
+* **Normalización de `DatePicker` y eventos de todo el día:** Extrae la fecha seleccionada evitando desfases de zona horaria UTC y, si se marca *"Todo el día"* sobre la fecha actual (cuyo inicio `00:00` ya transcurrió), desactiva automáticamente el recordatorio por defecto para no bloquear el guardado.
+* **Vista previa en tiempo real:** Muestra dinámicamente la fecha y hora exacta de disparo (*"Sonará el: ..."*) o una advertencia preventiva antes de confirmar el formulario cuando la antelación elegida supera el margen disponible.
 
 ---
 

@@ -69,6 +69,52 @@ def combinar_local_a_utc(fecha: date, hora: time) -> datetime:
     return local_a_utc(datetime.combine(fecha, hora))
 
 
+def calcular_inicio_por_defecto(
+    fecha_inicial: date | None,
+    ahora_local: datetime,
+) -> tuple[datetime, datetime]:
+    """Calcula inicio y fin sugeridos en hora local respetando el cruce de medianoche."""
+    dia_hoy = ahora_local.date()
+    if fecha_inicial is None or fecha_inicial == dia_hoy:
+        # Conserva el salto al día siguiente si se abre entre 23:00 y 23:59
+        ini_loc = (ahora_local + timedelta(hours=1)).replace(
+            minute=0, second=0, microsecond=0
+        )
+    else:
+        ini_loc = datetime.combine(fecha_inicial, time(9, 0), tzinfo=ahora_local.tzinfo)
+    return ini_loc, ini_loc + timedelta(hours=1)
+
+
+def fecha_desde_datepicker(valor: datetime) -> date:
+    """Extrae la fecha seleccionada en ft.DatePicker evitando desfases por zona horaria."""
+    if valor.tzinfo is not None and valor.hour == 0 and valor.minute == 0:
+        return valor.date()
+    return utc_a_local(valor).date() if valor.tzinfo is not None else valor.date()
+
+
+def evaluar_preview_recordatorio(
+    *,
+    objetivo_utc: datetime,
+    antelacion_minutos: int | None,
+    ahora_utc: datetime,
+    formato_24h: bool = True,
+) -> tuple[bool, str]:
+    """Devuelve (es_valido, mensaje_preview) para orientar al usuario antes de guardar."""
+    if antelacion_minutos is None:
+        return True, "No se enviará notificación para esta actividad."
+    if antelacion_minutos < 0 or antelacion_minutos > 10080:
+        return False, "La antelación debe estar entre 0 y 10,080 minutos (máximo 7 días)."
+    disparo_utc = asegurar_utc(objetivo_utc) - timedelta(minutes=antelacion_minutos)
+    txt_hora = formatear_fecha_hora(disparo_utc, formato_24h=formato_24h)
+    if disparo_utc < asegurar_utc(ahora_utc) + timedelta(seconds=1):
+        return (
+            False,
+            f"El aviso calculado ({txt_hora}) ya transcurrió. "
+            "Reduce la antelación o elige una fecha/hora posterior.",
+        )
+    return True, f"Sonará el: {txt_hora}"
+
+
 def formatear_hora(dt: datetime, *, formato_24h: bool = True) -> str:
     local = utc_a_local(dt)
     if formato_24h:
