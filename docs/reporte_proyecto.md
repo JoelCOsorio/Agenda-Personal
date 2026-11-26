@@ -103,10 +103,13 @@ El código está estructurado siguiendo la arquitectura de **Puertos y Adaptador
 | `src/agenda_app/infrastructure/platform/` | Detector de plataforma y lanzador externo condicionado por SO (`mailto:` multiplataforma y `tel:` exclusivo de Android). |
 | `src/agenda_app/presentation/` | Tema Material 3 (claro/oscuro), formateadores `UTC <-> Local`, shell responsivo (`NavigationBar`/`NavigationRail`), vistas de Agenda (Día, Semana, Mes, Año), Tareas, Contactos, Ajustes y diálogos modales. |
 | `src/assets/icon.svg` | Ícono vectorial minimalista personalizado de **Atempo** usado por `flet build` para generar los íconos de cada plataforma. |
+| `atempo.spec` | Especificación alternativa de empaquetado con PyInstaller para escritorio (Linux/Windows), complementaria al empaquetado oficial `flet build`. |
 | `.github/workflows/` | Pipelines de GitHub Actions (`ci.yml` para pruebas en Linux/Windows y `build.yml` para compilación y Releases). |
 | `tests/` | Suite automatizada dividida en pruebas unitarias (`tests/unit/`), integración SQLite (`tests/integration/`) y prueba de arranque Flet (`tests/test_main.py`). |
 
 ### 5.2 Diagrama de Arquitectura y Capas
+
+#### Sintaxis Mermaid
 
 ```mermaid
 flowchart TD
@@ -134,9 +137,304 @@ flowchart TD
     Infra --> Dom
 ```
 
-### 5.3 Diagrama de Clases y Modelo Relacional de Datos
+#### Sintaxis PlantUML
 
-Los diagramas vectoriales completos de diseño se encuentran disponibles en [`docs/diseno/diagrama_clases.svg`](./diseno/diagrama_clases.svg), [`docs/diseno/diagrama_entidad_relacion.svg`](./diseno/diagrama_entidad_relacion.svg) y el script DDL verificado en [`docs/diseno/esquema_inicial.sql`](./diseno/esquema_inicial.sql).
+```plantuml
+@startuml
+title Arquitectura en Capas — Puertos y Adaptadores (Atempo)
+skinparam packageStyle rectangle
+
+package "4. Capa de Presentación (Flet 1.1 — Material 3)" as Pres {
+  [Shell Responsivo\nNavigationBar / NavigationRail] as Shell
+  [Vistas: Agenda, Tareas, Contactos, Ajustes] as Vistas
+  [Diálogos y Formateadores UTC/Local] as Dialogos
+}
+
+package "2. Capa de Aplicación" as App {
+  [Servicios de Dominio\nEventos, Tareas, Contactos, Categorías, Ajustes] as Svc
+  [MotorNotificaciones & StartupReconciler] as Motor
+  interface "Puertos (Protocol)\nIRepositorios, IAdaptadorNotificaciones,\nILanzadorAccionesExternas, IReloj" as Ports
+}
+
+package "1. Capa de Dominio (Python Puro)" as Dom {
+  [Entidades (UUIDv4, UTC)\nEnumeraciones y Excepciones] as Ent
+  [Reglas Puras\nExpansorRecurrencia, DetectorSolapamiento,\nValidadorRecordatorio] as Rules
+}
+
+package "3. Capa de Infraestructura" as Infra {
+  [SQLiteDatabase WAL + 6 Repositorios] as Sqlite
+  [Adaptadores SO\nAndroid / Windows / Linux + Worker D-Bus] as NotifSO
+  [Detector SO + Lanzador mailto:/tel:] as Plat
+}
+
+Pres --> Svc
+Pres --> Motor
+Svc --> Ent
+Svc --> Rules
+Motor --> Ent
+Motor --> Rules
+Svc --> Ports
+Motor --> Ports
+
+Sqlite ..|> Ports
+NotifSO ..|> Ports
+Plat ..|> Ports
+Infra --> Ent
+@enduml
+```
+
+### 5.3 Diagrama de Clases UML del Dominio
+
+La versión vectorial completa se encuentra en [`docs/diseno/diagrama_clases.svg`](./diseno/diagrama_clases.svg).
+
+#### Sintaxis Mermaid
+
+```mermaid
+classDiagram
+    direction TB
+
+    class EntidadBase {
+        <<abstract>>
+        +UUID id
+        +DateTime created_at
+        +DateTime updated_at
+        +tocar_actualizacion(ahora: DateTime) void
+    }
+
+    class Categoria {
+        +str nombre
+        +str color_hex
+        +str icono
+    }
+
+    class Subcategoria {
+        +UUID categoria_id
+        +str nombre
+        +str color_hex
+    }
+
+    class Evento {
+        +str titulo
+        +str descripcion
+        +DateTime fecha_inicio
+        +DateTime fecha_fin
+        +bool todo_el_dia
+        +str ubicacion
+        +str color_hex
+        +UUID categoria_id
+        +UUID subcategoria_id
+        +es_pasado(referencia: DateTime) bool
+        +reprogramar(inicio, fin, ahora) void
+    }
+
+    class ReglaRecurrencia {
+        +UUID evento_id
+        +TipoFrecuencia frecuencia
+        +int intervalo
+        +tuple dias_semana
+        +Date fecha_fin_recurrencia
+        +int max_ocurrencias
+    }
+
+    class Tarea {
+        +str titulo
+        +str descripcion
+        +DateTime fecha_limite
+        +PrioridadTarea prioridad
+        +EstadoTarea estado
+        +UUID categoria_id
+        +UUID subcategoria_id
+        +completar(ahora: DateTime) void
+        +reactivar(estado: EstadoTarea, ahora: DateTime) void
+        +reprogramar(fecha: DateTime, ahora: DateTime) void
+    }
+
+    class Recordatorio {
+        +int id_notificacion_so
+        +TipoOrigenRecordatorio tipo_origen
+        +UUID evento_id
+        +UUID tarea_id
+        +int antelacion_minutos
+        +DateTime fecha_disparo
+        +EstadoRecordatorio estado
+        +marcar_entregado(ahora) void
+        +marcar_perdido(ahora) void
+        +posponer(nueva_fecha, ahora) void
+        +cancelar(ahora) void
+    }
+
+    class Contacto {
+        +str nombre
+        +str telefono
+        +str correo
+        +str notas
+        +str etiqueta
+        +puede_enviar_correo() bool
+        +puede_llamar(plataforma: PlataformaSO) bool
+        +generar_uri_correo() str
+        +generar_uri_llamada(plataforma: PlataformaSO) str
+    }
+
+    class ConfiguracionSistema {
+        <<singleton>>
+        +int minutos_posponer_defecto
+        +int antelacion_recordatorio_defecto_min
+        +bool sonido_notificaciones
+        +bool mostrar_alertas_perdidas_inicio
+        +bool formato_24h
+        +int primer_dia_semana
+        +VistaAgenda vista_inicial_agenda
+        +bool tema_oscuro
+        +restablecer_valores_defecto(ahora) void
+    }
+
+    EntidadBase <|-- Categoria
+    EntidadBase <|-- Subcategoria
+    EntidadBase <|-- Evento
+    EntidadBase <|-- ReglaRecurrencia
+    EntidadBase <|-- Tarea
+    EntidadBase <|-- Recordatorio
+    EntidadBase <|-- Contacto
+    EntidadBase <|-- ConfiguracionSistema
+
+    Categoria "1" *-- "0..*" Subcategoria : contiene
+    Evento "0..*" --> "0..1" Categoria
+    Evento "0..*" --> "0..1" Subcategoria
+    Tarea "0..*" --> "0..1" Categoria
+    Tarea "0..*" --> "0..1" Subcategoria
+    Evento "1" *-- "0..1" ReglaRecurrencia
+    Evento "0..1" *-- "0..1" Recordatorio : XOR
+    Tarea "0..1" *-- "0..1" Recordatorio : XOR
+    Evento "0..*" -- "0..*" Contacto : vincula
+    Tarea "0..*" -- "0..*" Contacto : vincula
+```
+
+#### Sintaxis PlantUML
+
+```plantuml
+@startuml
+title Diagrama de Clases UML — Modelo de Dominio (Atempo)
+
+abstract class EntidadBase {
+  +id : UUID
+  +created_at : DateTime
+  +updated_at : DateTime
+  +tocar_actualizacion(ahora : DateTime) : void
+}
+
+class Categoria {
+  +nombre : str
+  +color_hex : str
+  +icono : str?
+}
+
+class Subcategoria {
+  +categoria_id : UUID
+  +nombre : str
+  +color_hex : str?
+}
+
+class Evento {
+  +titulo : str
+  +descripcion : str?
+  +fecha_inicio : DateTime
+  +fecha_fin : DateTime?
+  +todo_el_dia : bool
+  +ubicacion : str?
+  +color_hex : str?
+  +categoria_id : UUID?
+  +subcategoria_id : UUID?
+  +es_pasado(referencia : DateTime) : bool
+  +reprogramar(inicio, fin, ahora) : void
+}
+
+class ReglaRecurrencia {
+  +evento_id : UUID
+  +frecuencia : TipoFrecuencia
+  +intervalo : int
+  +dias_semana : tuple[str]
+  +fecha_fin_recurrencia : Date?
+  +max_ocurrencias : int?
+}
+
+class Tarea {
+  +titulo : str
+  +descripcion : str?
+  +fecha_limite : DateTime?
+  +prioridad : PrioridadTarea
+  +estado : EstadoTarea
+  +categoria_id : UUID?
+  +subcategoria_id : UUID?
+  +completar(ahora : DateTime) : void
+  +reactivar(estado : EstadoTarea, ahora : DateTime) : void
+  +reprogramar(fecha : DateTime?, ahora : DateTime) : void
+}
+
+class Recordatorio {
+  +id_notificacion_so : int
+  +tipo_origen : TipoOrigenRecordatorio
+  +evento_id : UUID?
+  +tarea_id : UUID?
+  +antelacion_minutos : int
+  +fecha_disparo : DateTime
+  +estado : EstadoRecordatorio
+  +marcar_entregado(ahora : DateTime) : void
+  +marcar_perdido(ahora : DateTime) : void
+  +posponer(nueva_fecha : DateTime, ahora : DateTime) : void
+  +cancelar(ahora : DateTime) : void
+}
+
+class Contacto {
+  +nombre : str
+  +telefono : str?
+  +correo : str?
+  +notas : str?
+  +etiqueta : str?
+  +puede_enviar_correo() : bool
+  +puede_llamar(plataforma : PlataformaSO) : bool
+  +generar_uri_correo() : str?
+  +generar_uri_llamada(plataforma : PlataformaSO) : str?
+}
+
+class ConfiguracionSistema <<singleton>> {
+  +minutos_posponer_defecto : int
+  +antelacion_recordatorio_defecto_min : int
+  +sonido_notificaciones : bool
+  +mostrar_alertas_perdidas_inicio : bool
+  +formato_24h : bool
+  +primer_dia_semana : int
+  +vista_inicial_agenda : VistaAgenda
+  +tema_oscuro : bool
+  +restablecer_valores_defecto(ahora : DateTime) : void
+}
+
+EntidadBase <|-- Categoria
+EntidadBase <|-- Subcategoria
+EntidadBase <|-- Evento
+EntidadBase <|-- ReglaRecurrencia
+EntidadBase <|-- Tarea
+EntidadBase <|-- Recordatorio
+EntidadBase <|-- Contacto
+EntidadBase <|-- ConfiguracionSistema
+
+Categoria "1" *-- "0..*" Subcategoria : contiene
+Evento "0..*" --> "0..1" Categoria
+Evento "0..*" --> "0..1" Subcategoria
+Tarea "0..*" --> "0..1" Categoria
+Tarea "0..*" --> "0..1" Subcategoria
+Evento "1" *-- "0..1" ReglaRecurrencia : recurrencia
+Evento "0..1" *-- "0..1" Recordatorio : {XOR}
+Tarea "0..1" *-- "0..1" Recordatorio : {XOR}
+Evento "0..*" -- "0..*" Contacto : vincula
+Tarea "0..*" -- "0..*" Contacto : vincula
+@enduml
+```
+
+### 5.4 Modelo Entidad–Relación (SQLite 3)
+
+El diagrama vectorial se encuentra en [`docs/diseno/diagrama_entidad_relacion.svg`](./diseno/diagrama_entidad_relacion.svg) y el script DDL verificado en [`docs/diseno/esquema_inicial.sql`](./diseno/esquema_inicial.sql).
+
+#### Sintaxis Mermaid
 
 ```mermaid
 erDiagram
@@ -228,13 +526,192 @@ erDiagram
     }
 ```
 
-### 5.4 Estrategia del Motor de Notificaciones por Sistema Operativo
+#### Sintaxis PlantUML
+
+```plantuml
+@startuml
+title Modelo Entidad-Relación — Esquema SQLite 3 (Atempo)
+hide circle
+skinparam linetype ortho
+
+entity "CATEGORIAS" as categorias {
+  * id : TEXT <<PK>>
+  --
+  * nombre : TEXT
+  * color_hex : TEXT
+  icono : TEXT
+  * created_at : TEXT
+  * updated_at : TEXT
+}
+
+entity "SUBCATEGORIAS" as subcategorias {
+  * id : TEXT <<PK>>
+  --
+  * categoria_id : TEXT <<FK>>
+  * nombre : TEXT
+  color_hex : TEXT
+  * created_at : TEXT
+  * updated_at : TEXT
+}
+
+entity "EVENTOS" as eventos {
+  * id : TEXT <<PK>>
+  --
+  * titulo : TEXT
+  descripcion : TEXT
+  * fecha_inicio : TEXT
+  fecha_fin : TEXT
+  * todo_el_dia : INTEGER
+  ubicacion : TEXT
+  color_hex : TEXT
+  categoria_id : TEXT <<FK>>
+  subcategoria_id : TEXT <<FK>>
+  * created_at : TEXT
+  * updated_at : TEXT
+}
+
+entity "REGLAS_RECURRENCIA" as recurrencia {
+  * id : TEXT <<PK>>
+  --
+  * evento_id : TEXT <<FK, UK>>
+  * frecuencia : TEXT
+  * intervalo : INTEGER
+  dias_semana : TEXT
+  fecha_fin_recurrencia : TEXT
+  max_ocurrencias : INTEGER
+}
+
+entity "TAREAS" as tareas {
+  * id : TEXT <<PK>>
+  --
+  * titulo : TEXT
+  descripcion : TEXT
+  fecha_limite : TEXT
+  * prioridad : TEXT
+  * estado : TEXT
+  categoria_id : TEXT <<FK>>
+  subcategoria_id : TEXT <<FK>>
+  * created_at : TEXT
+  * updated_at : TEXT
+}
+
+entity "RECORDATORIOS" as recordatorios {
+  * id : TEXT <<PK>>
+  --
+  * id_notificacion_so : INTEGER <<UK>>
+  * tipo_origen : TEXT
+  evento_id : TEXT <<FK, UK>>
+  tarea_id : TEXT <<FK, UK>>
+  * antelacion_minutos : INTEGER
+  * fecha_disparo : TEXT
+  * estado : TEXT
+}
+
+entity "CONTACTOS" as contactos {
+  * id : TEXT <<PK>>
+  --
+  * nombre : TEXT
+  telefono : TEXT
+  correo : TEXT
+  notas : TEXT
+  etiqueta : TEXT
+}
+
+entity "EVENTO_CONTACTO" as ev_con {
+  * evento_id : TEXT <<PK, FK>>
+  * contacto_id : TEXT <<PK, FK>>
+  --
+  * created_at : TEXT
+}
+
+entity "TAREA_CONTACTO" as tar_con {
+  * tarea_id : TEXT <<PK, FK>>
+  * contacto_id : TEXT <<PK, FK>>
+  --
+  * created_at : TEXT
+}
+
+entity "CONFIGURACION_SISTEMA" as config {
+  * singleton_key : INTEGER <<PK>>
+  --
+  * id : TEXT <<UK>>
+  * minutos_posponer_defecto : INTEGER
+  * antelacion_recordatorio_defecto_min : INTEGER
+  * sonido_notificaciones : INTEGER
+  * mostrar_alertas_perdidas_inicio : INTEGER
+  * formato_24h : INTEGER
+  * primer_dia_semana : INTEGER
+  * vista_inicial_agenda : TEXT
+  * tema_oscuro : INTEGER
+}
+
+categorias ||--o{ subcategorias : "CASCADE"
+categorias |o--o{ eventos : "SET NULL"
+subcategorias |o--o{ eventos : "SET NULL"
+categorias |o--o{ tareas : "SET NULL"
+subcategorias |o--o{ tareas : "SET NULL"
+eventos ||--o| recurrencia : "CASCADE"
+eventos |o--o| recordatorios : "XOR / CASCADE"
+tareas |o--o| recordatorios : "XOR / CASCADE"
+eventos ||--o{ ev_con : "CASCADE"
+contactos ||--o{ ev_con : "CASCADE"
+tareas ||--o{ tar_con : "CASCADE"
+contactos ||--o{ tar_con : "CASCADE"
+@enduml
+```
+
+### 5.5 Estrategia del Motor de Notificaciones y Máquina de Estados
 
 Dado que `flet-notifications` presenta capacidades distintas en cada plataforma, el motor mantiene la tabla `recordatorios` como fuente única de verdad y aplica una estrategia específica detrás de `IAdaptadorNotificaciones`:
 
 * **Android:** emplea `schedule()` con `EXACT_ALLOW_WHILE_IDLE` (degradando automáticamente a `INEXACT_ALLOW_WHILE_IDLE` si el permiso exacto no está concedido), declara `ScheduledNotificationBootReceiver` en `pyproject.toml` para sobrevivir reinicios y configura el botón *Posponer* con `foreground=True` para que el intérprete Python reprograme la nueva alerta.
 * **Windows:** programa notificaciones únicas (*one-off*) y realiza cancelaciones individuales por `id_notificacion_so` (`int32`), ya que la API de Windows no admite cancelación masiva de pendientes ni recurrencias nativas.
 * **Linux:** al no existir programación diferida en FreeDesktop D-Bus, utiliza un planificador asíncrono `asyncio` mientras la aplicación está abierta y ofrece un proceso ligero opcional (`linux_worker.py`) registrable en `systemd --user` que lee el mismo archivo SQLite en modo WAL y emite notificaciones con botones vía `desktop-notifier`.
+
+#### Máquina de Estados del Recordatorio — Sintaxis Mermaid
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDIENTE : Crear o reprogramar
+    PENDIENTE --> CANCELADO : Eliminar item / Completar tarea / Editar horario
+    PENDIENTE --> ENTREGADO : SO dispara alerta a tiempo
+    PENDIENTE --> PERDIDO : Barrido al iniciar detecta vencimiento
+    ENTREGADO --> POSPUESTO : Accion rapida Posponer (+Ajustes)
+    ENTREGADO --> ATENDIDO : Usuario abre o marca visto
+    POSPUESTO --> ENTREGADO : SO dispara alerta diferida
+    POSPUESTO --> PERDIDO : Equipo apagado durante snooze
+    POSPUESTO --> CANCELADO : Item eliminado o tarea completada
+    PERDIDO --> POSPUESTO : Usuario pospone desde bandeja
+    PERDIDO --> ATENDIDO : Usuario marca como vista
+    CANCELADO --> PENDIENTE : Tarea reactivada o evento reprogramado
+    ATENDIDO --> [*]
+```
+
+#### Máquina de Estados del Recordatorio — Sintaxis PlantUML
+
+```plantuml
+@startuml
+title Máquina de Estados del Recordatorio (Motor Unificado)
+
+[*] --> PENDIENTE : Crear o reprogramar
+PENDIENTE --> CANCELADO : Eliminar ítem / Completar tarea / Editar horario
+PENDIENTE --> ENTREGADO : SO dispara alerta a tiempo
+PENDIENTE --> PERDIDO : StartupReconciler detecta vencimiento
+
+ENTREGADO --> POSPUESTO : Acción rápida Posponer (+minutos de Ajustes)
+ENTREGADO --> ATENDIDO : Usuario abre o marca visto
+
+POSPUESTO --> ENTREGADO : SO dispara alerta diferida
+POSPUESTO --> PERDIDO : Equipo apagado durante snooze
+POSPUESTO --> CANCELADO : Ítem eliminado o tarea completada
+
+PERDIDO --> POSPUESTO : Usuario pospone desde bandeja
+PERDIDO --> ATENDIDO : Usuario marca como vista
+
+CANCELADO --> PENDIENTE : Tarea reactivada o evento reprogramado
+ATENDIDO --> [*]
+@enduml
+```
 
 ---
 
